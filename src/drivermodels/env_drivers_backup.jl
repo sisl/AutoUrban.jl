@@ -1,0 +1,121 @@
+export EnvDriver
+
+type EnvDriver <: DriverModel{LatLonAccelDirection}
+    rec::SceneRecord
+    mlon::LaneFollowingDriver
+    mlat::LateralDriverModel
+    mlane::LaneChangeModel
+    yield::Bool
+    yield_count::Int
+    lane_desire::Int
+    coorperative::Symbol
+    longAcc::Float64
+    latAcc::Float64
+    direction::Int
+    a_cp_max::Float64
+    allwaystops::Array{AllWayStop}
+    allwaystop_ind::Int
+    allwaystop_waitlist::Array{Int}
+    allwaystop_stopcount::Int
+    allwaystop_waittime::Int
+    allwaystop_horizon::Float64
+    
+    function EnvDriver(
+        timestep::Float64;
+        rec::SceneRecord = SceneRecord(1, timestep),
+        mlon::LaneFollowingDriver=IDMDriver(),
+        mlat::LateralDriverModel=ProportionalLaneTracker(),
+        mlane::LaneChangeModel=MOBIL(timestep,mlon=IDMDriver()),
+        longAcc::Float64 = 0.0,
+        latAcc::Float64 = 0.0,
+        direction::Int = 1,
+        a_cp_max::Float64 = (rand()*0.4+0.5)*9.8,
+        allwaystop_waittime::Int = rand(10:40),
+        allwaystop_horizon::Float64 = rand()*30.0+10.0
+        )
+
+        retval = new()
+        retval.rec = rec
+        retval.mlon = mlon
+        retval.mlat = mlat
+        retval.mlane = mlane
+        retval.rec = rec
+        retval.longAcc = longAcc
+        retval.latAcc = latAcc
+        retval.direction = direction
+        retval.a_cp_max = a_cp_max
+        retval.allwaystop_waittime = allwaystop_waittime
+        retval.allwaystop_horizon = allwaystop_horizon
+        retval.allwaystops = AllWayStop[]
+        retval.allwaystop_ind = 0
+        retval.allwaystop_waitlist = Int[]
+        retval.allwaystop_stopcount = 0
+        retval
+    end
+end
+AutomotiveDrivingModels.get_name(::EnvDriver) = "EnvDriver"
+
+function set_desired_speed!(model::EnvDriver, v_des::Float64)
+    AutomotiveDrivingModels.set_desired_speed!(model.mlon, v_des)
+    AutomotiveDrivingModels.set_desired_speed!(model.mlane, v_des)
+    model
+end
+
+function track_longitudinal!(driver::LaneFollowingDriver, scene::Scene, roadway::Roadway, vehicle_index::Int, fore::NeighborLongitudinalResult)
+    v_ego = scene[vehicle_index].state.v
+    if fore.ind != 0
+        headway, v_oth = fore.Δs, scene[fore.ind].state.v
+    else
+        headway, v_oth = NaN, NaN
+    end
+    return track_longitudinal!(driver, v_ego, v_oth, headway)
+end
+
+function AutomotiveDrivingModels.observe!(driver::EnvDriver, scene::Scene, roadway::Roadway, egoid::Int)
+
+    AutomotiveDrivingModels.update!(driver.rec, scene)
+    observe!(driver.mlane, scene, roadway, egoid)
+    lane_change_action = rand(driver.mlane)
+   
+    vehicle_index = findfirst(scene, egoid)
+    lane_change_action = LaneChangeChoice(DIR_MIDDLE)
+    currentLane = scene[vehicle_index].state.posF.roadind.tag.lane
+    
+    laneoffset = get_lane_offset(lane_change_action, driver.rec, roadway, vehicle_index)
+    lateral_speed = convert(Float64, get(VELFT, driver.rec, roadway, vehicle_index))
+
+    
+    if lane_change_action.dir == DIR_MIDDLE
+        fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
+    elseif lane_change_action.dir == DIR_LEFT
+        fore = get_neighbor_fore_along_left_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
+    else
+        @assert(lane_change_action.dir == DIR_RIGHT)
+        fore = get_neighbor_fore_along_right_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
+    end
+
+    
+    acc_allwaystop = reactAllWayStop!(driver, scene, roadway, egoid)
+    
+    AutomotiveDrivingModels.track_lateral!(driver.mlat, laneoffset, lateral_speed)
+    #AutomotiveDrivingModels.track_longitudinal!(driver.mlon, scene, roadway, vehicle_index, fore.ind)
+    roadind = scene[vehicle_index].state.posF.roadind
+    max_k,distance = get_max_curvature(roadind, roadway, 25.0,direction = driver.direction)
+    #println(max_k,distance)
+    v_max = sqrt(driver.a_cp_max/abs(max_k))
+    v_des_old = driver.mlon.v_des
+    set_desired_speed!(driver.mlon, min(v_des_old,v_max))
+    track_longitudinal!(driver.mlon, scene, roadway, vehicle_index, fore)
+    set_desired_speed!(driver.mlon, v_des_old)
+    
+    driver.latAcc = rand(driver.mlat)
+    driver.longAcc = min(acc_allwaystop,rand(driver.mlon).a)
+    driver
+end
+
+function Base.rand(driver::EnvDriver)
+    LatLonAccelDirection(driver.latAcc, driver.longAcc, driver.direction)
+end
+
+Distributions.pdf(driver::EnvDriver, a::LatLonAccelDirection) = pdf(driver.mlat, a.a_lat) * pdf(driver.mlon, a.a_lon)
+Distributions.logpdf(driver::EnvDriver, a::LatLonAccelDirection) = logpdf(driver.mlat, a.a_lat) * logpdf(driver.mlon, a.a_lon)

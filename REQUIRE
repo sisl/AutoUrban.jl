@@ -1,0 +1,13 @@
+julia 0.5
+
+Compat 0.8
+Reexport
+DataArrays
+DataFrames
+Discretizers
+Distributions
+Parameters
+LsqFit
+EzXML
+AutomotiveDrivingModels
+AutoViz
