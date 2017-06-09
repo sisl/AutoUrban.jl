@@ -1,9 +1,6 @@
 using Base.Test
 
 using AutomotiveDrivingModels
-using AutoViz
-using LsqFit
-using Reactive, Interact
 using EzXML
 using UrbanDrivingSimulation
 
