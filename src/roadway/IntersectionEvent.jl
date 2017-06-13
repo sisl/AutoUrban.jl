@@ -1,6 +1,5 @@
 abstract IntersectionEvent
-
-################################################################
+#####under developing
 type AllWayStop <: IntersectionEvent
     connections::Array{Tuple{Int,Int}}
     entrances::Array{Int}

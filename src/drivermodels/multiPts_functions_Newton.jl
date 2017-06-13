@@ -1,6 +1,8 @@
-export getCommands!
+export get_commands!
 
-function getCommands!(model::DriverModel,scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,ego_index::Int)
+#####under developing
+
+function get_commands!(model::MultiPtsDriver,scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,ego_index::Int)
     veh = scene[ego_index]
     x = veh.state.posG.x
     y = veh.state.posG.y
@@ -351,9 +353,4 @@ function simXYPKVLinear(q0::Matrix{Float64},N::Int,h::Float64,u::Matrix{Float64}
         end
     end
     return Y,dY,H
-end
-
-function clamp(x::Float64,xmin::Float64,xmax::Float64)
-    xout = max(min(x,xmax),xmin);
-    xout
 end

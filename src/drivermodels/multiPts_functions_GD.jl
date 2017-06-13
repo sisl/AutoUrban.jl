@@ -1,6 +1,6 @@
-export getCommands!
+export get_commands!
 
-function getCommands!(model::DriverModel,scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,ego_index::Int)
+function get_commands!(model::MultiPtsDriver,scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,ego_index::Int)
     veh = scene[ego_index]
     x = veh.state.posG.x
     y = veh.state.posG.y
@@ -185,26 +185,26 @@ function solveTrajXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,
     end
     Y=bestY;
     
-    if  bestU[1]!=(bestU[1]=customclamp(bestU[1],-vdotmax,vdotmax))
+    if  bestU[1]!=(bestU[1]=clamp(bestU[1],-vdotmax,vdotmax))
         converged=false
     end
-    if bestU[2]!=(bestU[2]=customclamp(bestU[2],-vdotmax,vdotmax))
+    if bestU[2]!=(bestU[2]=clamp(bestU[2],-vdotmax,vdotmax))
         converged=false
     end
-    if bestU[3]!=(bestU[3]=customclamp(bestU[3],-kmax,kmax))
+    if bestU[3]!=(bestU[3]=clamp(bestU[3],-kmax,kmax))
         converged=false
     end
-    if bestU[4]!=(bestU[4]=customclamp(bestU[4],-kmax,kmax)) 
+    if bestU[4]!=(bestU[4]=clamp(bestU[4],-kmax,kmax)) 
         converged=false
     end  
     #=
-    @assert bestU[1]==(bestU[1]=customclamp(bestU[1],-vdotmax,vdotmax))
+    @assert bestU[1]==(bestU[1]=clamp(bestU[1],-vdotmax,vdotmax))
 
-    @assert bestU[2]==(bestU[2]=customclamp(bestU[2],-vdotmax,vdotmax))
+    @assert bestU[2]==(bestU[2]=clamp(bestU[2],-vdotmax,vdotmax))
 
-    @assert bestU[3]==(bestU[3]=customclamp(bestU[3],-kmax,kmax))
+    @assert bestU[3]==(bestU[3]=clamp(bestU[3],-kmax,kmax))
 
-    @assert bestU[4]==(bestU[4]=customclamp(bestU[4],-kmax,kmax)) 
+    @assert bestU[4]==(bestU[4]=clamp(bestU[4],-kmax,kmax)) 
     =#
     u=bestU;
     uvec=u;
@@ -253,9 +253,9 @@ function simXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,u::Mat
         v=Y[i,5];
         dvdu=dY[5,:,i];
         dvdu=reshape(dvdu,1,M)
-        acc=customclamp(acc,-vdotmax,vdotmax);
-        steer=Y[i,4]+customclamp(steer-Y[i,4],-kdeltamax,kdeltamax);
-        steer=customclamp(steer,-kmax,kmax);
+        acc=clamp(acc,-vdotmax,vdotmax);
+        steer=Y[i,4]+clamp(steer-Y[i,4],-kdeltamax,kdeltamax);
+        steer=clamp(steer,-kmax,kmax);
         s=v*h+0.5*acc*h^2;
         dsdu=dvdu*h+0.5*h^2*daccdu;
         if(abs(steer)<0.01)
@@ -304,9 +304,4 @@ function simXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,u::Mat
         end
     end
     return Y,dY
-end
-
-function customclamp(x::Float64,xmin::Float64,xmax::Float64)
-    xout = max(min(x,xmax),xmin);
-    xout
 end

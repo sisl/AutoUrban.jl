@@ -1,6 +1,6 @@
-export EnvDriver
+export UrbanDriver
 
-type EnvDriver <: DriverModel{LatLonAccelDirection}
+type UrbanDriver <: DriverModel{LatLonAccelDirection}
     rec::SceneRecord
     mlon::LaneFollowingDriver
     mlat::LateralDriverModel
@@ -9,8 +9,9 @@ type EnvDriver <: DriverModel{LatLonAccelDirection}
     latAcc::Float64
     direction::Int
     a_cp_max::Float64
+    color::Colorant
     
-    function EnvDriver(
+    function UrbanDriver(
         timestep::Float64;
         rec::SceneRecord = SceneRecord(1, timestep),
         mlon::LaneFollowingDriver=IDMDriver(),
@@ -20,6 +21,7 @@ type EnvDriver <: DriverModel{LatLonAccelDirection}
         latAcc::Float64 = 0.0,
         direction::Int = 1,
         a_cp_max::Float64 = (rand()*0.4+0.5)*9.8,
+        color::Colorant=RGB(0, 1, 0)
         )
 
         retval = new()
@@ -31,12 +33,13 @@ type EnvDriver <: DriverModel{LatLonAccelDirection}
         retval.latAcc = latAcc
         retval.direction = direction
         retval.a_cp_max = a_cp_max
+        retval.color = color
         retval
     end
 end
-AutomotiveDrivingModels.get_name(::EnvDriver) = "EnvDriver"
+AutomotiveDrivingModels.get_name(::UrbanDriver) = "UrbanDriver"
 
-function set_desired_speed!(model::EnvDriver, v_des::Float64)
+function set_desired_speed!(model::UrbanDriver, v_des::Float64)
     AutomotiveDrivingModels.set_desired_speed!(model.mlon, v_des)
     AutomotiveDrivingModels.set_desired_speed!(model.mlane, v_des)
     model
@@ -52,7 +55,7 @@ function track_longitudinal!(driver::LaneFollowingDriver, scene::Union{Scene,Fra
     return track_longitudinal!(driver, v_ego, v_oth, headway)
 end
 
-function AutomotiveDrivingModels.observe!(driver::EnvDriver, scene2::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
+function AutomotiveDrivingModels.observe!(driver::UrbanDriver, scene2::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
     scene = Scene()
     for veh in scene2
         push!(scene,Vehicle(veh.state,veh.def.def,veh.id))
@@ -95,9 +98,9 @@ function AutomotiveDrivingModels.observe!(driver::EnvDriver, scene2::Union{Scene
     driver
 end
 
-function Base.rand(driver::EnvDriver)
+function Base.rand(driver::UrbanDriver)
     LatLonAccelDirection(driver.latAcc, driver.longAcc, driver.direction)
 end
 
-Distributions.pdf(driver::EnvDriver, a::LatLonAccelDirection) = pdf(driver.mlat, a.a_lat) * pdf(driver.mlon, a.a_lon)
-Distributions.logpdf(driver::EnvDriver, a::LatLonAccelDirection) = logpdf(driver.mlat, a.a_lat) * logpdf(driver.mlon, a.a_lon)
+Distributions.pdf(driver::UrbanDriver, a::LatLonAccelDirection) = pdf(driver.mlat, a.a_lat) * pdf(driver.mlon, a.a_lon)
+Distributions.logpdf(driver::UrbanDriver, a::LatLonAccelDirection) = logpdf(driver.mlat, a.a_lat) * logpdf(driver.mlon, a.a_lon)

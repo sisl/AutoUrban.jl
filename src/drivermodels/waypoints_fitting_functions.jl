@@ -1,12 +1,13 @@
 export 
-    fitLane,
-    moveAlongCure,
-    getCurvePtVecPer
+    fit_lane,
+    move_along_curve,
+    get_curvePt_cec_per
         
+#####under developing
 
 curveModel(x, p) = p[1]*x.^3+p[2]*x.^2+p[3]*x+p[4]
 
-function fitLane(model::DriverModel, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
+function fit_lane(model::MultiPtsDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
     sampleDistance=25.0;
     sampleInterval=1.0;
     #model(x, p) = p[1]*x^3+p[2]*x^2+p[3]*x+p[4]
@@ -44,7 +45,7 @@ function fitLane(model::DriverModel, scene::Union{Scene,Frame{Entity{VehicleStat
     end
 end
 
-function moveAlongCure(fit::LsqFit.LsqFitResult,x::Float64,y::Float64,Δs::Float64,direction::Bool,mode::Int)
+function move_along_curve(fit::LsqFit.LsqFitResult,x::Float64,y::Float64,Δs::Float64,direction::Bool,mode::Int)
     p=fit.param
     x_n=x
     y_n=y
@@ -74,7 +75,7 @@ function moveAlongCure(fit::LsqFit.LsqFitResult,x::Float64,y::Float64,Δs::Float
     return x_n,y_n
 end
 
-function getCurvePtVecPer(fit::LsqFit.LsqFitResult,x::Float64,y::Float64,turnDirection::Int,direction::Bool,mode::Int)
+function get_curvePt_vec_per(fit::LsqFit.LsqFitResult,x::Float64,y::Float64,turnDirection::Int,direction::Bool,mode::Int)
     p=fit.param
     if mode==1
         slope=3*p[1]*x^2+2*p[2]*x+p[3]
@@ -102,7 +103,7 @@ function getCurvePtVecPer(fit::LsqFit.LsqFitResult,x::Float64,y::Float64,turnDir
     return curvePtVecPer
 end
 
-function setLaneChangingPts!(model::DriverModel, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
+function set_lane_changing_pts!(model::MultiPtsDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
     #println("enter function")
     #laneFunction=fitLane(model, scene, roadway, ego_index)
     veh = scene[ego_index]    
@@ -122,7 +123,7 @@ function setLaneChangingPts!(model::DriverModel, scene::Union{Scene,Frame{Entity
     
     frenet=Frenet(roadind, roadway[roadind].s,0.0,0.0)
     pos=get_posG(frenet,roadway)
-    fit,xstart,ystart,direction,mode=fitLane(model::DriverModel, scene::Scene, roadway::Roadway, ego_index::Int)
+    fit,xstart,ystart,direction,mode=fit_lane(model::DriverModel, scene::Scene, roadway::Roadway, ego_index::Int)
     
        
     transitionMagnitude=0.2
@@ -134,7 +135,7 @@ function setLaneChangingPts!(model::DriverModel, scene::Union{Scene,Frame{Entity
     v_desire=model.v_desire
     
     if model.laneNum_desire==laneNum
-        curvePtVecPer=getCurvePtVecPer(fit,x,y,1,direction,mode) #curvePtVecPer pointing to left
+        curvePtVecPer=get_curvePt_vec_per(fit,x,y,1,direction,mode) #curvePtVecPer pointing to left
         offSetDistance=sqrt((x-xstart)^2+(y-ystart)^2)
         if (curvePtVecPer'*offSetVec)[1]>0
             turnDirection=1
@@ -155,8 +156,8 @@ function setLaneChangingPts!(model::DriverModel, scene::Union{Scene,Frame{Entity
             end
             
             offSetDistance=offSetDistance-transitionMagnitude
-            x_n,y_n=moveAlongCure(fit,x_n,y_n,Δs,direction,mode)
-            curvePtVecPer=getCurvePtVecPer(fit,x_n,y_n,turnDirection,direction,mode)
+            x_n,y_n=move_along_curve(fit,x_n,y_n,Δs,direction,mode)
+            curvePtVecPer=get_curvePt_vec_per(fit,x_n,y_n,turnDirection,direction,mode)
             pos=[x_n;y_n]+offSetDistance*curvePtVecPer
             model.Pts[1,i]=pos[1]
             model.Pts[2,i]=pos[2]
@@ -172,7 +173,7 @@ function setLaneChangingPts!(model::DriverModel, scene::Union{Scene,Frame{Entity
                 model.v_desire=v_desire
             end
             
-            x_n,y_n=moveAlongCure(fit,x_n,y_n,Δs,direction,mode)
+            x_n,y_n=move_along_curve(fit,x_n,y_n,Δs,direction,mode)
             pos=[x_n;y_n]
             model.Pts[1,i]=pos[1]
             model.Pts[2,i]=pos[2]
@@ -186,7 +187,7 @@ function setLaneChangingPts!(model::DriverModel, scene::Union{Scene,Frame{Entity
             turnDirection=-1
             #println("right")
         end
-        curvePtVecPer=curvePtVecPer=getCurvePtVecPer(fit,x,y,turnDirection,direction,mode)
+        curvePtVecPer=curvePtVecPer=get_curvePt_vec_per(fit,x,y,turnDirection,direction,mode)
         if (curvePtVecPer'*offSetVec)[1]>0
             offSetDistance=sqrt((x-xstart)^2+(y-ystart)^2)
         else
@@ -206,8 +207,8 @@ function setLaneChangingPts!(model::DriverModel, scene::Union{Scene,Frame{Entity
             end
             
             offSetDistance=offSetDistance+transitionMagnitude
-            x_n,y_n=moveAlongCure(fit,x_n,y_n,Δs,direction,mode)
-            curvePtVecPer=getCurvePtVecPer(fit,x_n,y_n,turnDirection,direction,mode)
+            x_n,y_n=move_along_cure(fit,x_n,y_n,Δs,direction,mode)
+            curvePtVecPer=get_curvePt_vec_per(fit,x_n,y_n,turnDirection,direction,mode)
             pos=[x_n;y_n]+offSetDistance*curvePtVecPer
             model.Pts[1,i]=pos[1]
             model.Pts[2,i]=pos[2]
@@ -223,8 +224,8 @@ function setLaneChangingPts!(model::DriverModel, scene::Union{Scene,Frame{Entity
                 model.v_desire=v_desire
             end
             
-            x_n,y_n=moveAlongCure(fit,x_n,y_n,Δs,direction,mode)
-            curvePtVecPer=getCurvePtVecPer(fit,x_n,y_n,turnDirection,direction,mode)
+            x_n,y_n=move_along_curve(fit,x_n,y_n,Δs,direction,mode)
+            curvePtVecPer=get_curvePt_vec_per(fit,x_n,y_n,turnDirection,direction,mode)
             pos=[x_n;y_n]+1.0*DEFAULT_LANE_WIDTH*curvePtVecPer
             model.Pts[1,i]=pos[1]
             model.Pts[2,i]=pos[2]

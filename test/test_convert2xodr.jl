@@ -5,9 +5,9 @@ let
     connect_two_seg!(roadway.segments[6],roadway.segments[7],roadway)
     connect_two_seg!(roadway.segments[8],roadway.segments[1],roadway)
     doc,r = initialize_XML()
-    convertRoadway!(r,roadway)
+    convert_roadway!(r,roadway)
     junctions = [junction]
-    handleJunctions(r,junctions,roadway)
+    handle_junctions(r,junctions,roadway)
     r1 = root(doc)
     r1_id = []
     for child1 in eachelement(r1)

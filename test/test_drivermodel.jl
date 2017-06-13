@@ -20,10 +20,10 @@ let
     timeStep = 0.05
     models = Dict{Int, DriverModel}()
 
-    models[1]=EnvDriver(timeStep,direction=1,a_cp_max=0.7*9.8)
-    models[2]=EnvDriver(timeStep,direction=2,a_cp_max=0.6*9.8)
+    models[1]=UrbanDriver(timeStep,direction=1,a_cp_max=0.7*9.8)
+    models[2]=UrbanDriver(timeStep,direction=2,a_cp_max=0.6*9.8)
     models[3]=MultiPtsTurningDriver(timeStep,v_max=20.0,v_min=0.0,turning_direction=3)
-    excuteAction!(models[3],0.0,0,scene, roadway, 1)
+    excute_action!(models[3],0.0,0,scene, roadway, 1)
     actions = get_actions!(Array(Any, length(scene)), scene, roadway, models)
     for i=1:100
         get_actions!(actions, scene, roadway, models)

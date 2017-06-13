@@ -1,7 +1,7 @@
-function setLaneChangingPts!(model::DriverModel, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
+function set_lane_changing_pts!(model::MultiPtsDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
     # direction is like -1: turn to right lane, 1: turn to left lane
     #println("enter function")
-    
+            
     veh = scene[ego_index]    
     x = veh.state.posG.x
     y = veh.state.posG.y
@@ -12,7 +12,7 @@ function setLaneChangingPts!(model::DriverModel, scene::Union{Scene,Frame{Entity
     accmax=model.accmax
     v = veh.state.v
     roadind=veh.state.posF.roadind
-    Δt = model.C.Δt
+    Δt = model.Δt
     
     #determine transitionStep
     #if it is current lane
@@ -307,7 +307,7 @@ end
 
 #########
 
-function setLaneChangingPts_with_direction!(model::DriverModel, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int, turning_direction::Int = 1)
+function set_lane_changing_pts_with_direction!(model::MultiPtsDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int, turning_direction::Int = 1)
     
     veh = scene[ego_index]    
     x = veh.state.posG.x

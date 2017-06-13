@@ -1,9 +1,6 @@
-import AutoViz.render
-import AutoViz.render!
-
-function render!(
+function render_waypoints!(
     rendermodel::RenderModel,
-    pts::Matrix{Float64},
+    pts::Matrix{Float64,1},
     color::Colorant=RGB(1, 0, 0)
     )
     
@@ -11,7 +8,7 @@ function render!(
     rendermodel
 end
 
-function render(ctx::CairoContext, scene::Scene, roadway::Roadway,pts::Matrix{Float64};
+function render(ctx::CairoContext, scene::Scene, roadway::Roadway,pts::Matrix{Float64,1};
     rendermodel::RenderModel=RenderModel(),
     cam::Camera=SceneFollowCamera(),
     car_colors::Dict{Int,Colorant}=Dict{Int,Colorant}(),
@@ -24,7 +21,7 @@ function render(ctx::CairoContext, scene::Scene, roadway::Roadway,pts::Matrix{Fl
 
     render!(rendermodel, roadway)
     render!(rendermodel, scene, car_colors=car_colors)
-    render!(rendermodel,pts)
+    render_waypoints!(rendermodel,pts)
 
     camera_set!(rendermodel, cam, scene, roadway, canvas_width, canvas_height)
 
@@ -32,7 +29,7 @@ function render(ctx::CairoContext, scene::Scene, roadway::Roadway,pts::Matrix{Fl
     ctx
 end
 
-function render(scene::Scene, roadway::Roadway,pts::Matrix{Float64};
+function render(scene::Scene, roadway::Roadway,pts::Matrix{Float64,1};
     canvas_width::Int=DEFAULT_CANVAS_WIDTH,
     canvas_height::Int=DEFAULT_CANVAS_HEIGHT,
     rendermodel::RenderModel=RenderModel(),

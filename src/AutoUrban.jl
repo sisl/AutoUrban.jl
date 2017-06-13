@@ -1,6 +1,6 @@
 __precompile__()
 
-module UrbanDrivingSimulation
+module AutoUrban
 
 using AutomotiveDrivingModels
 using AutoViz
@@ -10,8 +10,8 @@ using EzXML
 
 include("constants.jl")
 include("simulation/main.jl")
+include("drivermodels/main.jl")
 include("render/main.jl")
 include("roadway/main.jl")
-include("drivermodels/main.jl")
 
 end

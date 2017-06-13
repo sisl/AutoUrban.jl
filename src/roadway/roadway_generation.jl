@@ -392,7 +392,7 @@ function connect_two_seg!(source::RoadSegment,dest::RoadSegment,roadway::Roadway
     
 end
 
-function addConnection!(connection::Connection,roadway::Roadway;
+function add_connection!(connection::Connection,roadway::Roadway;
     boundary_left::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_right::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_middle::LaneBoundary=LaneBoundary(:solid, :white)
@@ -453,9 +453,9 @@ function addConnection!(connection::Connection,roadway::Roadway;
 end
 
 
-function addJunction!(junction::Junction,roadway::Roadway)
+function add_junction!(junction::Junction,roadway::Roadway)
     for connection in junction.connections
-        addConnection!(connection,roadway)
+        add_connection!(connection,roadway)
     end
 end
 
@@ -570,7 +570,7 @@ function gen_intersection(;nlanes::Int=2,roadlength::Float64=5.0,
     push!(retval.segments, seg8)
     
     
-    addJunction!(junction,retval)
+    add_junction!(junction,retval)
     return retval,junction
 end
 
@@ -627,7 +627,7 @@ function gen_loop_roadway(nlanes::Int;
     retval
 end
 
-function addLine!(origin::VecSE2,nlanes::Int,laneLength::Float64,roadway::Roadway;
+function add_line!(origin::VecSE2,nlanes::Int,laneLength::Float64,roadway::Roadway;
     lane_width::Float64=DEFAULT_LANE_WIDTH, # [m]
     lane_widths::Vector{Float64} = fill(lane_width, nlanes),    
     boundary_leftmost::LaneBoundary=LaneBoundary(:solid, :white),

@@ -1,9 +1,9 @@
-function getLaneLength(lane)
+function get_lane_length(lane)
     ind = curveindex_end(lane.curve)
     s = lane.curve[ind].s    
 end
 
-function convertJuliaLaneId2VTDLaneId(laneTag,roadway)
+function convert_JuliaLaneId2VTDLaneId(laneTag,roadway)
     seg = roadway.segments[laneTag.segment]
     id_Julia = laneTag.lane
     lane_num = length(seg.lanes)
@@ -28,7 +28,7 @@ function initialize_XML()
     return doc,r
 end
 
-function addRoadMark!(lane,markType="broken")
+function add_road_mark!(lane,markType="broken")
     roadMark=addelement!(lane,"roadMark")
     roadMark["sOffset"]=0.0
     roadMark["type"]=markType
@@ -39,10 +39,10 @@ function addRoadMark!(lane,markType="broken")
     return roadMark
 end
 
-function convertLane!(laneTag,right,roadway)
+function convert_lane!(laneTag,right,roadway)
     laneJulia = roadway.segments[laneTag.segment].lanes[laneTag.lane]
     laneWidth = laneJulia.width   
-    id = convertJuliaLaneId2VTDLaneId(laneTag,roadway)
+    id = convert_JuliaLaneId2VTDLaneId(laneTag,roadway)
     lane=addelement!(right,"lane")
     lane["id"]=id
     lane["type"]="driving"
@@ -53,21 +53,21 @@ function convertLane!(laneTag,right,roadway)
     width["b"]=0.0
     width["c"]=0.0
     width["d"]=0.0
-    roadMark=addRoadMark!(lane)
+    roadMark=add_road_mark!(lane)
     link=addelement!(lane,"link","")
     if !isempty(laneJulia.entrances)
-        prevId = convertJuliaLaneId2VTDLaneId(laneJulia.entrances[1].target.tag,roadway)
+        prevId = convert_JuliaLaneId2VTDLaneId(laneJulia.entrances[1].target.tag,roadway)
         predecessor=addelement!(link,"predecessor")
         predecessor["id"]=prevId
     end
     if !isempty(laneJulia.exits)
-        nextId = convertJuliaLaneId2VTDLaneId(laneJulia.exits[1].target.tag,roadway)
+        nextId = convert_JuliaLaneId2VTDLaneId(laneJulia.exits[1].target.tag,roadway)
         successor=addelement!(link,"successor")
         successor["id"]=nextId
     end
 end
 
-function handleRoadConnection!(seg,road,r,roadway) 
+function handle_road_connection!(seg,road,r,roadway) 
     link = addelement!(road,"link","")
     road["junction"] = -1
     lane = seg.lanes[1]
@@ -87,18 +87,18 @@ function handleRoadConnection!(seg,road,r,roadway)
     end
 end
 
-function convertSeg!(seg,r,roadway)
+function convert_seg!(seg,r,roadway)
     road = addelement!(r,"road")
     road["name"]=""
     road["id"]=seg.id
     lane=seg.lanes[1]
-    s = getLaneLength(lane)
+    s = get_lane_length(lane)
     road["length"]= s
     thetype = addelement!(road,"type")
     thetype["s"]=0
     thetype["type"]="rural"
  
-    handleRoadConnection!(seg,road,r,roadway)
+    handle_road_connection!(seg,road,r,roadway)
     
     #deal with planView
     planView=addelement!(road,"planView")
@@ -139,14 +139,14 @@ function convertSeg!(seg,r,roadway)
     lane["id"]=0
     lane["type"]="driving"
     lane["level"]="false"
-    addRoadMark!(lane,"solid")
+    add_road_mark!(lane,"solid")
     
     for lane in seg.lanes
-        convertLane!(lane.tag,right,roadway)
+        convert_lane!(lane.tag,right,roadway)
     end  
 end
 
-function handleJunction!(r,id,junction,roadway)
+function handle_junction!(r,id,junction,roadway)
     junctionId = id
     junctionVTD = addelement!(r,"junction")
     junctionVTD["name"] = ""
@@ -162,8 +162,8 @@ function handleJunction!(r,id,junction,roadway)
         connectionVTD["contactPoint"] = "start"
         for i = 1:length(connection.laneConnections)
             laneLink = addelement!(connectionVTD,"laneLink")
-            laneLink["from"] = convertJuliaLaneId2VTDLaneId(LaneTag(connection.source,connection.laneConnections[i][1]),roadway) 
-            laneLink["to"] = convertJuliaLaneId2VTDLaneId(LaneTag(connection.path,i),roadway)
+            laneLink["from"] = convert_JuliaLaneId2VTDLaneId(LaneTag(connection.source,connection.laneConnections[i][1]),roadway) 
+            laneLink["to"] = convert_JuliaLaneId2VTDLaneId(LaneTag(connection.path,i),roadway)
         end
         for road in find(r,"road")
             if parse(Int,road["id"]) == connection.source
@@ -195,15 +195,15 @@ function handleJunction!(r,id,junction,roadway)
     end
 end
 
-function handleJunctions(r,junctions,roadway)
+function handle_junctions(r,junctions,roadway)
     for i = 1:length(junctions)
-        handleJunction!(r,i,junctions[i],roadway)
+        handle_junction!(r,i,junctions[i],roadway)
     end
 end
 
-function convertRoadway!(r,roadway)
+function convert_roadway!(r,roadway)
     for seg in roadway.segments
-        convertSeg!(seg,r,roadway)
+        convert_seg!(seg,r,roadway)
     end
     #resolveRoadJunction!(r,roadway)
 end

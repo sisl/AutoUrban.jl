@@ -3,23 +3,25 @@ import AutoViz.render!
 
 function render_multipoint_drivers!(
     rendermodel::RenderModel,
-    model::DriverModel,
-    color::Colorant=RGB(1, 0, 0)
+    model::MultiPtsDriver,
+    vehid::Int,
+    car_colors::Dict{Int,Colorant}
     )
     
-    add_instruction!(rendermodel, render_point_trail, (model.Pts,color,0.25))
+    add_instruction!(rendermodel, render_point_trail, (model.Pts,model.color,0.25))
+    car_colors[vehid]=model.color
     rendermodel
 end
 
-function render_env_drivers!(
+function render_urban_drivers!(
     rendermodel::RenderModel,
-    model::DriverModel,
+    model::UrbanDriver,
     vehid::Int,
-    car_colors::Dict{Int,Colorant},
-    color::Colorant=RGB(1, 0, 0)
+    car_colors::Dict{Int,Colorant}
     )
 
-    car_colors[vehid]=colorant"green"
+    car_colors[vehid]=model.color
+    rendermodel
 end
 #=
 function render_trafficlights!(rendermodel::RenderModel,trafficlights::Vector{TrafficLight})
@@ -51,17 +53,19 @@ function render(ctx::CairoContext, scene::Union{Scene,Frame{Entity{VehicleState,
     clear_setup!(rendermodel)
 
     render!(rendermodel, roadway)
-    render!(rendermodel, scene, car_colors=car_colors)
+    
     for (i,veh) in enumerate(scene)
         model = models[veh.id]
         name = AutomotiveDrivingModels.get_name(model)
         if  name == "MultiPtsTurningDriver"
-            render_multipoint_drivers!(rendermodel,model)
+            render_multipoint_drivers!(rendermodel,model,veh.id,car_colors)
         end
-        if name == "EnvDriver"
-            render_env_drivers!(rendermodel,model,veh.id,car_colors)
+        if name == "UrbanDriver"
+            render_urban_drivers!(rendermodel,model,veh.id,car_colors)
         end
     end
+    
+    render!(rendermodel, scene, car_colors=car_colors)
     
     textoverlay=TextOverlay(text,colorant"white",20,VecE2(10, 20),1.5,false)
     render!(rendermodel, textoverlay, scene, roadway)

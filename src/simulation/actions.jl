@@ -106,7 +106,7 @@ function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(v
 
     #VehicleState(posG, roadway, v′)
     state = VehicleState(posG, roadway, v′)
-    projections = inLanes(posG, roadway)
+    projections = in_lanes(posG, roadway)
     for projection in projections
         if  previousInd.tag.segment == projection.tag.segment
             posF = Frenet(projection, roadway)
