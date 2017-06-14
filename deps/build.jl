@@ -6,5 +6,9 @@ if !in("Records", packages)
     Pkg.clone("https://github.com/tawheeler/Records.jl.git")
 end
 if !in("AutomotiveDrivingModels", packages)
-	Pkg.clone("https://github.com/sisl/AutomotiveDrivingModels.jl.git")
+    Pkg.clone("https://github.com/sisl/AutomotiveDrivingModels.jl.git")
 end
+if !in("AutoViz", packages)
+    Pkg.clone("https://github.com/sisl/AutoViz.jl.git")
+end
+
