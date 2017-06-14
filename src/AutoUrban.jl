@@ -5,7 +5,6 @@ module AutoUrban
 using AutomotiveDrivingModels
 using AutoViz
 using LsqFit
-using Reactive, Interact
 using EzXML
 
 include("constants.jl")
