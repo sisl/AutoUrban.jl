@@ -30,13 +30,13 @@ let
         tick!(scene, roadway, actions, timeStep)
     end
     actions = get_actions!(Array(Any, length(scene)), scene, roadway, models)
-    @test actions[1].a_lat==0.0
-    @test actions[1].a_lon==-0.05641834275191615
+    @test abs(actions[1].a_lat-0.0)<0.001
+    @test abs(actions[1].a_lon-(-0.05641834275191615))<0.001
     @test actions[1].direction==1
-    @test actions[2].a_lat==0.0
-    @test actions[2].a_lon==-0.0023799116323655056
+    @test abs(actions[2].a_lat-0.0)<0.001
+    @test abs(actions[2].a_lon-(-0.0023799116323655056))<0.001
     @test actions[2].direction==2
-    @test actions[3].a==0.07816860295178636
-    @test actions[3].δ==0.00531000497036248
-    @test actions[3].direction==3 
+    @test abs(actions[3].a-0.07816860295178636)<0.001
+    @test abs(actions[3].δ-0.00531000497036248)<0.001
+    @test abs(actions[3].direction-3 )<0.001
 end
