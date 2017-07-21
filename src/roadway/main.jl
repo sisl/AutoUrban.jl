@@ -7,6 +7,7 @@ export
     Junction,
     connect_two_lane_general!,
     connect_two_seg!,
+    connect_two_seg_general!,
     add_connection!,
     add_junction!,
     gen_connected_lanes,

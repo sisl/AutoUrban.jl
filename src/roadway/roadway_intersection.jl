@@ -58,14 +58,25 @@ function move_along_with_direction(roadind::RoadIndex, roadway::Roadway, Δs::Fl
             return RoadIndex(curveind, roadind.tag)
         end
     else
-        if roadind.ind.i == 0
-            ind = get_curve_index(CurveIndex(1,0.0), lane.curve, curvept.s+Δs)
-        elseif roadind.ind.i == length(lane.curve)
-            ind = get_curve_index(curveindex_end(lane.curve), lane.curve, curvept.s+Δs)
+        if Δs >= 0.0
+            if roadind.ind.i == 0
+                ind = get_curve_index(CurveIndex(1,0.0), lane.curve, curvept.s+Δs)
+            elseif roadind.ind.i == length(lane.curve)
+                ind = get_curve_index(curveindex_end(lane.curve), lane.curve, curvept.s+Δs)
+            else
+                ind = get_curve_index(roadind.ind, lane.curve, Δs)
+            end
+            RoadIndex(ind, roadind.tag)
         else
-            ind = get_curve_index(roadind.ind, lane.curve, Δs)
+            if roadind.ind.i == 0
+                ind = get_curve_index(CurveIndex(1,0.0), lane.curve, curvept.s+Δs)
+            elseif roadind.ind.i == length(lane.curve)
+                ind = get_curve_index(curveindex_end(lane.curve), lane.curve, Δs)
+            else
+                ind = get_curve_index(roadind.ind, lane.curve, Δs)
+            end
+            RoadIndex(ind, roadind.tag)
         end
-        RoadIndex(ind, roadind.tag)
     end
 end
 

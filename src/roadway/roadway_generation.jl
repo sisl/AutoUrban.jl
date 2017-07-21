@@ -374,22 +374,138 @@ function connect_two_seg!(source::RoadSegment,dest::RoadSegment,roadway::Roadway
 
     for i = 1:length(connections)
         before = source.lanes[connections[i][1]]
-        next = nothing
+        next = segs[1].lanes[i]
+        connect!(before,next)
+        before = next
         for j = 1:length(segs)
-            connect!(before,segs[j].lanes[i])
             if j == length(segs)
                 next = dest.lanes[connections[i][2]]
             else
                 next = segs[j+1].lanes[i]
             end
-            connect!(segs[j].lanes[i],next)
-            before = segs[j].lanes[1]
+            connect!(before,next)
+            before = next
         end
     end
     for i = 1:length(segs)
         push!(roadway.segments, segs[i])
     end
     
+end
+
+function connect_two_seg_general!(source::RoadSegment,dest::RoadSegment,roadway::Roadway;
+    direction::Tuple{Int,Int}=(1,1),
+    connections::Array{Tuple{Int,Int}}=Array(Tuple{Int,Int},0),
+    boundary_left::LaneBoundary=LaneBoundary(:solid, :white),
+    boundary_right::LaneBoundary=LaneBoundary(:solid, :white),
+    boundary_middle::LaneBoundary=LaneBoundary(:solid, :white)
+    )
+    if isempty(connections)
+        for i=1:length(source.lanes)
+            push!(connections,(i,i))
+        end
+    end
+    curveptsss = []
+    for i = 1:length(connections)
+        cindS = curveindex_end(source.lanes[connections[i][1]].curve)
+        if direction[1]==-1
+            cindS = CURVEINDEX_START
+        end
+        print()
+        cindD = CURVEINDEX_START
+        if direction[2]==-1
+            cindD = curveindex_end(dest.lanes[connections[i][2]].curve)
+        end
+        A = source.lanes[connections[i][1]].curve[cindS].pos
+        if direction[1]==-1
+            A = VecSE2(A.x,A.y,mod2pi(A.θ+pi))
+        end
+        print(A)
+        B = dest.lanes[connections[i][2]].curve[cindD].pos
+        if direction[2]==-1
+            B = VecSE2(B.x,B.y,mod2pi(B.θ+pi))
+        end
+        print(B)
+        curveptss = connect_two_points_seperate(A::VecSE2, B::VecSE2)
+        push!(curveptsss,curveptss)
+    end
+    segs = []
+    seg_id = length(roadway.segments)
+    
+    for i = 1:length(curveptsss[1])
+        seg_id += 1
+        seg12 = RoadSegment(seg_id, Array(Lane, length(connections)))
+        for j =  1:length(connections)
+            tag12 = LaneTag(seg_id,j)
+            seg12.lanes[j] = Lane(tag12, curveptsss[j][i], width=source.lanes[connections[j][1]].width,
+                                        boundary_left=boundary_left, boundary_right=boundary_right,
+                                        )  
+        end
+        push!(segs,seg12)
+    end
+
+    for i = 1:length(connections)
+        before = source.lanes[connections[i][1]]
+        next = segs[1].lanes[i]
+        if direction[1] == 1
+            connect_general!(before,next,(1,1))
+        elseif direction[1] == -1
+            connect_general!(before,next,(-1,1))
+        end
+        before = next
+        for j = 1:length(segs)
+            if j == length(segs)
+                next = dest.lanes[connections[i][2]]
+                if direction[2] == -1
+                    connect_general!(before,next,(1,-1))
+                elseif direction[1] == 1
+                    connect_general!(before,next,(1,1))
+                end
+            else
+                next = segs[j+1].lanes[i]
+                connect_general!(before,next,(1,1))
+            end
+            before = next
+        end
+    end
+    
+    for i = 1:length(segs)
+        push!(roadway.segments, segs[i])
+    end
+    
+end
+
+function connect_general!(source::Lane, dest::Lane,direction::Tuple{Int,Int}=(1,1))
+    # place these at the front
+    if direction[1]==1 && direction[2] ==1
+        cindS = curveindex_end(source.curve)
+        cindD = CURVEINDEX_START
+
+        unshift!(source.exits,   LaneConnection(true,  cindS, RoadIndex(cindD, dest.tag)))
+        unshift!(dest.entrances, LaneConnection(false, cindD, RoadIndex(cindS, source.tag)))
+        (source, dest)
+    elseif direction[1]==1 && direction[2] ==-1
+        cindS = curveindex_end(source.curve)
+        cindD = curveindex_end(dest.curve)
+
+        unshift!(source.exits,   LaneConnection(true,  cindS, RoadIndex(cindD, dest.tag)))
+        unshift!(dest.exits, LaneConnection(true, cindD, RoadIndex(cindS, source.tag)))
+        (source, dest)    
+    elseif direction[1]==-1 && direction[2] ==1
+        cindS = CURVEINDEX_START
+        cindD = CURVEINDEX_START
+
+        unshift!(source.entrances,   LaneConnection(false,  cindS, RoadIndex(cindD, dest.tag)))
+        unshift!(dest.entrances, LaneConnection(false, cindD, RoadIndex(cindS, source.tag)))
+        (source, dest)  
+    elseif direction[1]==-1 && direction[2] ==-1
+        cindS = CURVEINDEX_START
+        cindD = curveindex_end(dest.curve)
+
+        unshift!(source.entrances,   LaneConnection(false,  cindS, RoadIndex(cindD, dest.tag)))
+        unshift!(dest.exits, LaneConnection(true, cindD, RoadIndex(cindS, source.tag)))
+        (source, dest)    
+    end
 end
 
 function add_connection!(connection::Connection,roadway::Roadway;

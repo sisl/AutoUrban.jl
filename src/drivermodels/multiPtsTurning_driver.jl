@@ -42,6 +42,7 @@ end
 function set_pts!(model::MultiPtsTurningDriver,PtsIn::Matrix{Float64})
     model.Pts=PtsIn
     model.index=0
+    model.subindex=0
     model
 end
 
