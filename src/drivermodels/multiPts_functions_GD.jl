@@ -64,7 +64,7 @@ end
 function computeTrajectory(veh::Entity,initialXYPKV::Matrix{Float64},targetXYPKV::Matrix{Float64},mode::String,Δt::Float64,kmax::Float64,kdotmax::Float64,vdotmax::Float64)
     h=Δt
     N=2
-    #x=sqrt((initialXYPKV[1]-targetXYPKV[1])^2+(initialXYPKV[2]-targetXYPKV[2])^2)
+    #x=sqrt.((initialXYPKV[1]-targetXYPKV[1])^2+(initialXYPKV[2]-targetXYPKV[2])^2)
     #guess_a=2*(x-initialXYPKV[5]*h)/h^2
     #uguess = float([guess_a guess_a 0 0]')
     uguess = float([0 0 0 0]')
@@ -112,18 +112,18 @@ function solveTrajXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,
         for j=1:length(index)
             if index[j]==3 || index[j]==4
                 fjs=[f[j] f[j]+2*pi f[j]-2*pi];
-                (abs_fj,ind_fj)=findmin(abs(fjs))
+                (abs_fj,ind_fj)=findmin(abs.(fjs))
                 f[j]=fjs[ind_fj]
             end
             cost=cost+f[j]^2
         end
         dfdw = dY[index,:,end]
-        #cost=maximum(abs(f))
+        #cost=maximum(abs.(f))
         dcostdw=zeros(4,1)
         for j=1:length(index)
             #println("j = ",j," f[j] is ",f[j])
             #normalize dfdw
-            ####dfdw[j,:]=dfdw[j,:]/sqrt(dfdw[j,:]'*dfdw[j,:])
+            ####dfdw[j,:]=dfdw[j,:]/sqrt.(dfdw[j,:]'*dfdw[j,:])
             #println("dfdw is ",dfdw[j,:])
             #dcostdw=dcostdw+2*f[j]*dY[index[j],:,end]
             dcostdw=dcostdw+2*f[j]*dfdw[j,:]
@@ -145,7 +145,7 @@ function solveTrajXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,
         #cost_constrain=-log((w[1]-vdotmax)^2)-log((w[1]+vdotmax)^2)-log((w[2]-vdotmax)^2)-log((w[2]+vdotmax)^2)-log((w[3]-kmax)^2)-log((w[3]+kmax)^2)-log((w[4]-kmax)^2)-log((w[4]+kmax)^2);
         dcost_constraindw=zeros(4,1);
         for j=1:4
-            if j<3 && abs(w[j])>vdotmax*0.0
+            if j<3 && abs.(w[j])>vdotmax*0.0
                 dcost_constraindw[j]=-2/(w[j]-vdotmax)-2/(w[j]+vdotmax)
                 if w[j]>(vdotmax-0.1)
                     #println("command ",j," is ",w[j])
@@ -154,7 +154,7 @@ function solveTrajXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,
                     #println("command ",j," is ",w[j])
                     dcost_constraindw[j]=-2/(0.1)
                 end
-            elseif j>2 && abs(w[j])>kmax*0.0
+            elseif j>2 && abs.(w[j])>kmax*0.0
                 dcost_constraindw[j]=-2/(w[j]-kmax)-2/(w[j]+kmax)
                 if w[j]>(kmax-0.1)
                     #println("command ",j," is ",w[j])
@@ -173,11 +173,11 @@ function solveTrajXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,
         =#
         gradient=dcostdw+lambda.*dcost_constraindw;
         #normalize whole gradient
-        gradient=gradient/sqrt(gradient'*gradient)
+        gradient=gradient/sqrt.(gradient'*gradient)
         #=
-        if sqrt(gradient'*gradient)[1]*alpha > min(vdotmax,kmax)
-            println("gradient too large, is ",sqrt(gradient'*gradient)[1]*alpha)
-            gradient=gradient/sqrt(gradient'*gradient)
+        if sqrt.(gradient'*gradient)[1]*alpha > min(vdotmax,kmax)
+            println("gradient too large, is ",sqrt.(gradient'*gradient)[1]*alpha)
+            gradient=gradient/sqrt.(gradient'*gradient)
         end
         =#
         #println("gradiet is : ",alpha.*gradient)
@@ -185,26 +185,26 @@ function solveTrajXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,
     end
     Y=bestY;
     
-    if  bestU[1]!=(bestU[1]=clamp(bestU[1],-vdotmax,vdotmax))
+    if  bestU[1]!=(bestU[1]=clamp.(bestU[1],-vdotmax,vdotmax))
         converged=false
     end
-    if bestU[2]!=(bestU[2]=clamp(bestU[2],-vdotmax,vdotmax))
+    if bestU[2]!=(bestU[2]=clamp.(bestU[2],-vdotmax,vdotmax))
         converged=false
     end
-    if bestU[3]!=(bestU[3]=clamp(bestU[3],-kmax,kmax))
+    if bestU[3]!=(bestU[3]=clamp.(bestU[3],-kmax,kmax))
         converged=false
     end
-    if bestU[4]!=(bestU[4]=clamp(bestU[4],-kmax,kmax)) 
+    if bestU[4]!=(bestU[4]=clamp.(bestU[4],-kmax,kmax)) 
         converged=false
     end  
     #=
-    @assert bestU[1]==(bestU[1]=clamp(bestU[1],-vdotmax,vdotmax))
+    @assert bestU[1]==(bestU[1]=clamp.(bestU[1],-vdotmax,vdotmax))
 
-    @assert bestU[2]==(bestU[2]=clamp(bestU[2],-vdotmax,vdotmax))
+    @assert bestU[2]==(bestU[2]=clamp.(bestU[2],-vdotmax,vdotmax))
 
-    @assert bestU[3]==(bestU[3]=clamp(bestU[3],-kmax,kmax))
+    @assert bestU[3]==(bestU[3]=clamp.(bestU[3],-kmax,kmax))
 
-    @assert bestU[4]==(bestU[4]=clamp(bestU[4],-kmax,kmax)) 
+    @assert bestU[4]==(bestU[4]=clamp.(bestU[4],-kmax,kmax)) 
     =#
     u=bestU;
     uvec=u;
@@ -253,12 +253,12 @@ function simXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,u::Mat
         v=Y[i,5];
         dvdu=dY[5,:,i];
         dvdu=reshape(dvdu,1,M)
-        acc=clamp(acc,-vdotmax,vdotmax);
-        steer=Y[i,4]+clamp(steer-Y[i,4],-kdeltamax,kdeltamax);
-        steer=clamp(steer,-kmax,kmax);
+        acc=clamp.(acc,-vdotmax,vdotmax);
+        steer=Y[i,4]+clamp.(steer-Y[i,4],-kdeltamax,kdeltamax);
+        steer=clamp.(steer,-kmax,kmax);
         s=v*h+0.5*acc*h^2;
         dsdu=dvdu*h+0.5*h^2*daccdu;
-        if(abs(steer)<0.01)
+        if(abs.(steer)<0.01)
          # Integrate dynamics
             theta_n=theta+steer*v*h;
             theta_n=mod(theta_n,2*pi)

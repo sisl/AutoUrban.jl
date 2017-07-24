@@ -1,4 +1,4 @@
-type MultiPtsTurningDriver <: MultiPtsDriver
+mutable struct MultiPtsTurningDriver <: MultiPtsDriver
     Δt::Float64
     siji::AccSteerDriver
     N::Int #number of points

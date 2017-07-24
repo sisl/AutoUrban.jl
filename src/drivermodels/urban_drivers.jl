@@ -1,6 +1,6 @@
 export UrbanDriver
 
-type UrbanDriver <: DriverModel{LatLonAccelDirection}
+mutable struct UrbanDriver <: DriverModel{LatLonAccelDirection}
     rec::SceneRecord
     mlon::LaneFollowingDriver
     mlat::LateralDriverModel

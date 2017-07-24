@@ -1,6 +1,6 @@
 const ANG_THD = 1e-2
 
-type Connection
+mutable struct Connection
     source::Int
     dest::Int
     path::Int
@@ -8,17 +8,17 @@ type Connection
 end
 
 function Connection(source::Int,dest::Int)
-    Connection(source,dest,0,Array(Tuple{Int,Int},0))
+    Connection(source,dest,0,Array{Tuple{Int,Int}}(0))
 end
 
-type Junction
+mutable struct Junction
     connections::Array{Connection}
 end
 
 function get_min_difference_angles(A::Float64,B::Float64)
     b=B
     as=[A A+2*pi A-2*pi];
-    (abs_diff,ind_a)=findmin(abs(as-b))
+    (abs_diff,ind_a)=findmin(abs.(as-b))
     a=as[ind_a]
     return a,b,abs_diff
 end
@@ -30,7 +30,7 @@ function get_min_difference_angles_pos(A::Float64,B::Float64)
     pos_inds = find(x->x>=0,diffs)
     pos_as = as[pos_inds]
     pos_diffs = diffs[pos_inds]
-    pos_diff,ind_a = findmin(abs(pos_diffs))
+    pos_diff,ind_a = findmin(abs.(pos_diffs))
     a = pos_as[ind_a]
     return a,b,pos_diff
 end
@@ -42,7 +42,7 @@ function get_min_difference_angles_neg(A::Float64,B::Float64)
     neg_inds = find(x->x<=0,diffs)
     neg_as = as[neg_inds]
     neg_diffs = diffs[neg_inds]
-    neg_diff,ind_a = findmin(abs(neg_diffs))
+    neg_diff,ind_a = findmin(abs.(neg_diffs))
     neg_diff = - neg_diff
     a = neg_as[ind_a]
     return a,b,neg_diff
@@ -110,7 +110,7 @@ function connect_two_points_by_circle(A::VecSE2, B::VecSE2;s_base::Float64=0.0)
         posangle_a,posangle_b,angle_diff = get_min_difference_angles_neg(atan2(CA.y,CA.x),atan2(CB.y,CB.x))
     end
     
-    curvepts = Array(CurvePt, ncurvepts_per_turn)
+    curvepts = Array{CurvePt}(ncurvepts_per_turn)
     
     #@assert abs(angle_diff) > ANG_THD
     if abs(abs(angle_diff)-pi) < ANG_THD
@@ -137,7 +137,7 @@ function connect_two_points(A::VecSE2, B::VecSE2)
     #connect any two points with one points array
     _,_,abs_diff = get_min_difference_angles(B.θ,A.θ)
     
-    curvepts = Array(CurvePt,0)
+    curvepts = Array{CurveP}(0)
     push!(curvepts,CurvePt(A,  0.0,0.0,0.0))
     if abs_diff < ANG_THD
         push!(curvepts,CurvePt(B,  abs(A-B),0.0,0.0))   
@@ -285,7 +285,7 @@ function connect_two_lane_general!(source::Lane, dest::Lane,seg_id::Int,lane_wid
     cindD = CURVEINDEX_START
     A = source.curve[cindS].pos
     B = dest.curve[cindD].pos
-    seg12 = RoadSegment(seg_id, Array(Lane, 1))
+    seg12 = RoadSegment(seg_id, Array{Lane}(1))
     curvepts = connect_two_points(A, B)
     tag12 = LaneTag(seg_id,1)
 
@@ -311,7 +311,7 @@ function connect_two_lane_general!(source::Lane, dest::Lane,roadway::Roadway,lan
     seg_id = length(roadway.segments)
     for curvepts in curveptss
         seg_id += 1
-        seg12 = RoadSegment(seg_id, Array(Lane, 1))
+        seg12 = RoadSegment(seg_id, Array{Lane}(1))
         tag12 = LaneTag(seg_id,1)
         seg12.lanes[1] = Lane(tag12, curvepts, width=lane_width,
                                         boundary_left=boundary_left, boundary_right=boundary_right,
@@ -337,7 +337,7 @@ function connect_two_lane_general!(source::Lane, dest::Lane,roadway::Roadway,lan
 end
 
 function connect_two_seg!(source::RoadSegment,dest::RoadSegment,roadway::Roadway;
-    connections::Array{Tuple{Int,Int}}=Array(Tuple{Int,Int},0),
+    connections::Array{Tuple{Int,Int}}=Array{Tuple{Int,Int}}(0),
     boundary_left::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_right::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_middle::LaneBoundary=LaneBoundary(:solid, :white)
@@ -361,7 +361,7 @@ function connect_two_seg!(source::RoadSegment,dest::RoadSegment,roadway::Roadway
     
     for i = 1:length(curveptsss[1])
         seg_id += 1
-        seg12 = RoadSegment(seg_id, Array(Lane, length(connections)))
+        seg12 = RoadSegment(seg_id, Array{Lane}(length(connections)))
         for j =  1:length(connections)
             tag12 = LaneTag(seg_id,j)
             seg12.lanes[j] = Lane(tag12, curveptsss[j][i], width=source.lanes[connections[j][1]].width,
@@ -395,7 +395,7 @@ end
 
 function connect_two_seg_general!(source::RoadSegment,dest::RoadSegment,roadway::Roadway;
     direction::Tuple{Int,Int}=(1,1),
-    connections::Array{Tuple{Int,Int}}=Array(Tuple{Int,Int},0),
+    connections::Array{Tuple{Int,Int}}=Array{Tuple{Int,Int}}(0),
     boundary_left::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_right::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_middle::LaneBoundary=LaneBoundary(:solid, :white)
@@ -434,7 +434,7 @@ function connect_two_seg_general!(source::RoadSegment,dest::RoadSegment,roadway:
     
     for i = 1:length(curveptsss[1])
         seg_id += 1
-        seg12 = RoadSegment(seg_id, Array(Lane, length(connections)))
+        seg12 = RoadSegment(seg_id, Array{Lane}(length(connections)))
         for j =  1:length(connections)
             tag12 = LaneTag(seg_id,j)
             seg12.lanes[j] = Lane(tag12, curveptsss[j][i], width=source.lanes[connections[j][1]].width,
@@ -534,7 +534,7 @@ function add_connection!(connection::Connection,roadway::Roadway;
     
     for i = 1:length(curveptsss[1])
         seg_id += 1
-        seg12 = RoadSegment(seg_id, Array(Lane, length(connection.laneConnections)))
+        seg12 = RoadSegment(seg_id, Array{Lane}(length(connection.laneConnections)))
         if i==1
             connection.path = seg_id
         end

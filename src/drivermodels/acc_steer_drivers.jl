@@ -1,6 +1,6 @@
 export AccSteerDriver
 
-type AccSteerDriver <: DriverModel{AccelSteeringDirection}
+mutable struct AccSteerDriver <: DriverModel{AccelSteeringDirection}
     acc::Float64
     steer::Float64
     direction::Int

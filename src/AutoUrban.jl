@@ -4,10 +4,8 @@ module AutoUrban
 
 using AutomotiveDrivingModels
 using AutoViz
-using LsqFit
 using EzXML
 
-include("constants.jl")
 include("simulation/main.jl")
 include("drivermodels/main.jl")
 include("render/main.jl")

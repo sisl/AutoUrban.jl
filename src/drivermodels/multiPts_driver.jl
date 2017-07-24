@@ -1,1 +1,1 @@
-abstract MultiPtsDriver <: DriverModel{AccelSteeringDirection}
+abstract type MultiPtsDriver <: DriverModel{AccelSteeringDirection} end
