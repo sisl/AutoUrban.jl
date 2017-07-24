@@ -55,13 +55,15 @@ function render(ctx::CairoContext, scene::Union{Scene,Frame{Entity{VehicleState,
     render!(rendermodel, roadway)
     
     for (i,veh) in enumerate(scene)
-        model = models[veh.id]
-        name = AutomotiveDrivingModels.get_name(model)
-        if  name == "MultiPtsTurningDriver"
-            render_multipoint_drivers!(rendermodel,model,veh.id,car_colors)
-        end
-        if name == "UrbanDriver"
-            render_urban_drivers!(rendermodel,model,veh.id,car_colors)
+        if haskey(models,veh.id)
+            model = models[veh.id]
+            name = AutomotiveDrivingModels.get_name(model)
+            if  name == "MultiPtsTurningDriver"
+                render_multipoint_drivers!(rendermodel,model,veh.id,car_colors)
+            end
+            if name == "UrbanDriver"
+                render_urban_drivers!(rendermodel,model,veh.id,car_colors)
+            end
         end
     end
     
