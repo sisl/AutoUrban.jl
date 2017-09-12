@@ -1,3 +1,5 @@
+import AutomotiveDrivingModels.observe!
+
 mutable struct IDMDriver <: LaneFollowingDriver
     a::Float64 # predicted acceleration
     σ::Float64 # optional stdev on top of the model, set to zero or NaN for deterministic behavior
@@ -43,8 +45,27 @@ function set_desired_speed!(model::IDMDriver, v_des::Float64)
     model.v_des = v_des
     model
 end
-function track_longitudinal!(model::IDMDriver, v_ego::Float64, v_oth::Float64, headway::Float64)
 
+function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
+    vehicle_index = findfirst(scene, egoid)
+
+    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
+
+    v_ego = scene[vehicle_index].state.v
+    v_oth = NaN
+    headway = NaN
+
+    if fore.ind != 0
+        v_oth = scene[fore.ind].state.v
+        headway = fore.Δs
+    end
+
+    track_longitudinal!(model, v_ego, v_oth, headway)
+
+    return model
+end
+
+function track_longitudinal!(model::IDMDriver, v_ego::Float64, v_oth::Float64, headway::Float64)
     if !isnan(v_oth)
         #@assert !isnan(headway) && headway > 0
         if headway > 0.0
@@ -52,7 +73,7 @@ function track_longitudinal!(model::IDMDriver, v_ego::Float64, v_oth::Float64, h
             s_des = model.s_min + v_ego*model.T - v_ego*Δv / (2*sqrt(model.a_max*model.d_cmf))
             v_ratio = model.v_des > 0.0 ? (v_ego/model.v_des) : 1.0
             model.a = model.a_max * (1.0 - v_ratio^model.δ - (s_des/headway)^2)
-        elseif headway > -CAR_LENGTH
+        elseif headway > -3.0
             acc = -model.d_max
         else
             Δv = model.v_des - v_ego

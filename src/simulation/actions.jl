@@ -1,4 +1,4 @@
-immutable LatLonAccelDirection
+struct LatLonAccelDirection
     a_lat::Float64
     a_lon::Float64
     direction::Int
@@ -12,7 +12,7 @@ function Base.copy!(v::Vector{Float64}, a::LatLonAccel)
     v[3] = convert(Float64,a.direction)
     v
 end
-function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(veh::Entity{VehicleState, D, Int}, action::LatLonAccelDirection,  roadway::Roadway, Δt::Float64,)
+function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(veh::Entity{VehicleState, D, Int}, action::LatLonAccelDirection,  roadway::Roadway, Δt::Float64)
 
     a_lat = action.a_lat
     a_lon = action.a_lon
@@ -54,7 +54,7 @@ function pull_action!(::Type{LatLonAccelDirection}, a::Vector{Float64}, rec::Sce
     a
 end
 
-immutable AccelSteeringDirection
+struct AccelSteeringDirection
     a::Float64 # accel [m/s²]
     δ::Float64 # steering angle [rad]
     direction::Int64 # turning direction
