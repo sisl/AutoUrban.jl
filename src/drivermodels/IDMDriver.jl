@@ -46,7 +46,7 @@ function set_desired_speed!(model::IDMDriver, v_des::Float64)
     model
 end
 
-function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
+function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Frame{Entity{VehicleState, BicycleModel, Int}}, roadway::Roadway, egoid::Int)
     vehicle_index = findfirst(scene, egoid)
 
     fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
