@@ -65,6 +65,25 @@ function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Frame{Entity{
     return model
 end
 
+function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Scene, roadway::Roadway, egoid::Int)
+    vehicle_index = findfirst(scene, egoid)
+
+    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
+
+    v_ego = scene[vehicle_index].state.v
+    v_oth = NaN
+    headway = NaN
+
+    if fore.ind != 0
+        v_oth = scene[fore.ind].state.v
+        headway = fore.Δs
+    end
+
+    track_longitudinal!(model, v_ego, v_oth, headway)
+
+    return model
+end
+
 function track_longitudinal!(model::IDMDriver, v_ego::Float64, v_oth::Float64, headway::Float64)
     if !isnan(v_oth)
         #@assert !isnan(headway) && headway > 0
