@@ -3,14 +3,14 @@ const TURN_RIGHT_INDEX = 2
 const TURN_LEFT_INDEX = 3
 
 
-next_lane(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.exits[min(length(lane.exits),direction)].target.tag]
+next_lane(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.exits[clamp(direction,1,length(lane.exits))].target.tag]
 
-prev_lane(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.entrances[min(length(lane.entrances),direction)].target.tag]
+prev_lane(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.entrances[clamp(direction,1,length(lane.exits))].target.tag]
 
 
-next_lane_point(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.exits[min(length(lane.exits),direction)].target]
+next_lane_point(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.exits[clamp(direction,1,length(lane.exits))].target]
 
-prev_lane_point(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.entrances[min(length(lane.entrances),direction)].target]
+prev_lane_point(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.entrances[clamp(direction,1,length(lane.exits))].target]
 
 function move_along_with_direction(roadind::RoadIndex, roadway::Roadway, Δs::Float64; direction::Int = 1)
 

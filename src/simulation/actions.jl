@@ -1,4 +1,4 @@
-struct LatLonAccelDirection
+mutable struct LatLonAccelDirection
     a_lat::Float64
     a_lon::Float64
     direction::Int
