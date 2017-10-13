@@ -174,6 +174,17 @@ function AutomotiveDrivingModels.observe!(model::MOBILDriver, scene::Frame{Entit
             end
         end
     end
+
+    # chack if front vehicle is doing the same action
+    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
+    if fore.ind != 0
+        if model.dir == DIR_LEFT && scene[fore.ind].state.posF.t > 0.0 && sin(scene[fore.ind].state.posF.ϕ) > 0.0
+            model.dir == DIR_MIDDLE
+        elseif model.dir == DIR_RIGHT && scene[fore.ind].state.posF.t < 0.0 && sin(scene[fore.ind].state.posF.ϕ) < 0.0
+            model.dir == DIR_MIDDLE
+        end
+    end
+
     model
 end
 
@@ -316,6 +327,16 @@ function AutomotiveDrivingModels.observe!(model::MOBILDriver, scene::Scene, road
                 model.dir = DIR_LEFT
                 advantage_threshold = Δaₜₕ
             end
+        end
+    end
+
+    # chack if front vehicle is doing the same action
+    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
+    if fore.ind != 0
+        if model.dir == DIR_LEFT && scene[fore.ind].state.posF.t > 0.0 && sin(scene[fore.ind].state.posF.ϕ) > 0.0
+            model.dir = DIR_MIDDLE
+        elseif model.dir == DIR_RIGHT && scene[fore.ind].state.posF.t < 0.0 && sin(scene[fore.ind].state.posF.ϕ) < 0.0
+            model.dir = DIR_MIDDLE
         end
     end
 
