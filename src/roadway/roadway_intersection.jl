@@ -5,12 +5,12 @@ const TURN_LEFT_INDEX = 3
 
 next_lane(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.exits[clamp(direction,1,length(lane.exits))].target.tag]
 
-prev_lane(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.entrances[clamp(direction,1,length(lane.exits))].target.tag]
+prev_lane(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.entrances[clamp(direction,1,length(lane.entrances))].target.tag]
 
 
 next_lane_point(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.exits[clamp(direction,1,length(lane.exits))].target]
 
-prev_lane_point(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.entrances[clamp(direction,1,length(lane.exits))].target]
+prev_lane_point(lane::Lane, roadway::Roadway, direction::Int) = roadway[lane.entrances[clamp(direction,1,length(lane.entrances))].target]
 
 function move_along_with_direction(roadind::RoadIndex, roadway::Roadway, Δs::Float64; direction::Int = 1)
 
@@ -51,7 +51,7 @@ function move_along_with_direction(roadind::RoadIndex, roadway::Roadway, Δs::Fl
             else # in the gap between lanes
                 t = (Δs - (lane.curve[end].s - curvept.s)) / s_gap
                 curveind = CurveIndex(0, t)
-                RoadIndex(curveind, lane.exits[min(length(lane.exits),direction)].target.tag)
+                RoadIndex(curveind, lane.exits[clamp(direction,1,length(lane.exits))].target.tag)
             end
         else # no next lane, return the end of this lane
             curveind = curveindex_end(lane.curve)
