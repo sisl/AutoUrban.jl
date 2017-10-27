@@ -33,7 +33,6 @@ function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(v
     speed₂ = sqrt(dt₂*dt₂ + ds₂*ds₂)
     v₂ = sign(ds₂)*speed₂
     ϕ₂ = atan2(dt₂, ds₂) + (v₂ < 0.0)*π # handle negative speeds
-
     roadind = move_along_with_direction(veh.state.posF.roadind, roadway, Δs, direction = action.direction)
     footpoint = roadway[roadind]
     posG = convert(VecE2, footpoint.pos) + polar(t + Δt, footpoint.pos.θ + π/2)
@@ -108,18 +107,22 @@ function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(v
     state = VehicleState(posG, roadway, v′)
     projections = in_lanes(posG, roadway)
     for projection in projections
-        if  previousInd.tag.segment == projection.tag.segment
-            posF = Frenet(projection, roadway)
-            state = VehicleState(posG, posF, v′)
-            #println(posF)
-            break
-        end
-        dir = min(length(roadway[previousInd.tag].exits),action.direction)
+        dir = clamp(action.direction,1,length(roadway[previousInd.tag].exits))
         if roadway[previousInd.tag].exits[dir].target.tag.segment == projection.tag.segment && !isempty(roadway[previousInd.tag].exits)
             posF = Frenet(projection, roadway)
             state = VehicleState(posG, posF, v′)
             #println(posF)
-            break 
+            return state
+        end
+    end
+
+    for projection in projections
+        dir = clamp(action.direction,1,length(roadway[previousInd.tag].exits))
+        if  previousInd.tag.segment == projection.tag.segment
+            posF = Frenet(projection, roadway)
+            state = VehicleState(posG, posF, v′)
+            #println(posF)
+            return state
         end
     end
     return state
