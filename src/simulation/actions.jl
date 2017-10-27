@@ -106,13 +106,15 @@ function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(v
     #VehicleState(posG, roadway, v′)
     state = VehicleState(posG, roadway, v′)
     projections = in_lanes(posG, roadway)
-    for projection in projections
-        dir = clamp(action.direction,1,length(roadway[previousInd.tag].exits))
-        if roadway[previousInd.tag].exits[dir].target.tag.segment == projection.tag.segment && !isempty(roadway[previousInd.tag].exits)
-            posF = Frenet(projection, roadway)
-            state = VehicleState(posG, posF, v′)
-            #println(posF)
-            return state
+    if length(roadway[previousInd.tag].exits)>0
+        for projection in projections
+            dir = clamp(action.direction,1,length(roadway[previousInd.tag].exits))
+            if roadway[previousInd.tag].exits[dir].target.tag.segment == projection.tag.segment && !isempty(roadway[previousInd.tag].exits)
+                posF = Frenet(projection, roadway)
+                state = VehicleState(posG, posF, v′)
+                #println(posF)
+                return state
+            end
         end
     end
 
