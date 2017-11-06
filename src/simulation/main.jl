@@ -1,6 +1,7 @@
 export
 	LatLonAccelDirection,
 	AccelSteeringDirection,
+    NextState,
     convert2vehicle
 
 include("actions.jl")
