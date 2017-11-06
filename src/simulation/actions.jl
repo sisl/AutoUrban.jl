@@ -159,10 +159,11 @@ mutable struct NextState
     y::Float64
     theta::Float64
     speed::Float64
+    direction::Int
 end
 
 function NextState()
-    return NextState(0.0,0.0,0.0,0.0)
+    return NextState(0.0,0.0,0.0,0.0,1)
 end
 
 function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(veh::Entity{VehicleState, D, Int}, action::NextState,  roadway::Roadway, Δt::Float64)
