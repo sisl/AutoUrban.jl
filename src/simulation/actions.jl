@@ -166,9 +166,11 @@ function NextState()
 end
 
 function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(veh::Entity{VehicleState, D, Int}, action::NextState,  roadway::Roadway, Δt::Float64)
-    posG = VecSE2(action.x, action.y, action.theta)
     previousInd = veh.state.posF.roadind
-    
+
+    posG = VecSE2(action.x, action.y, action.theta)
+    v′ = NextState.speed
+
     state = VehicleState(posG, roadway, v′)
     projections = in_lanes(posG, roadway)
     if length(roadway[previousInd.tag].exits)>0
