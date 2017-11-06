@@ -169,7 +169,7 @@ function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(v
     previousInd = veh.state.posF.roadind
 
     posG = VecSE2(action.x, action.y, action.theta)
-    v′ = NextState.speed
+    v′ = action.speed
 
     state = VehicleState(posG, roadway, v′)
     projections = in_lanes(posG, roadway)
