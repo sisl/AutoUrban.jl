@@ -13,7 +13,7 @@ function Base.copy!(v::Vector{Float64}, a::LatLonAccel)
     v
 end
 function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(veh::Entity{VehicleState, D, Int}, action::LatLonAccelDirection,  roadway::Roadway, Δt::Float64)
-
+    previousInd = veh.state.posF.roadind
     a_lat = action.a_lat
     a_lon = action.a_lon
 
@@ -37,8 +37,32 @@ function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(v
     footpoint = roadway[roadind]
     posG = convert(VecE2, footpoint.pos) + polar(t + Δt, footpoint.pos.θ + π/2)
     posG = VecSE2(posG.x, posG.y, footpoint.pos.θ + ϕ₂)
-    VehicleState(posG, roadway, v₂)
+    
 
+    state = VehicleState(posG, roadway, v₂)
+    projections = in_lanes(posG, roadway)
+    if length(roadway[previousInd.tag].exits)>0
+        for projection in projections
+            dir = clamp(action.direction,1,length(roadway[previousInd.tag].exits))
+            if roadway[previousInd.tag].exits[dir].target.tag.segment == projection.tag.segment && !isempty(roadway[previousInd.tag].exits)
+                posF = Frenet(projection, roadway)
+                state = VehicleState(posG, posF, v₂)
+                #println(posF)
+                return state
+            end
+        end
+    end
+
+    for projection in projections
+        dir = clamp(action.direction,1,length(roadway[previousInd.tag].exits))
+        if  previousInd.tag.segment == projection.tag.segment
+            posF = Frenet(projection, roadway)
+            state = VehicleState(posG, posF, v₂)
+            #println(posF)
+            return state
+        end
+    end
+    return state
     # posF = Frenet(roadind, footpoint.s, t + Δt, ϕ₂)
     # VehicleState(posG, posF, v₂)
 end
@@ -53,7 +77,7 @@ function pull_action!(::Type{LatLonAccelDirection}, a::Vector{Float64}, rec::Sce
     a
 end
 
-struct AccelSteeringDirection
+mutable struct AccelSteeringDirection
     a::Float64 # accel [m/s²]
     δ::Float64 # steering angle [rad]
     direction::Int64 # turning direction
@@ -104,6 +128,47 @@ function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(v
     end
 
     #VehicleState(posG, roadway, v′)
+    state = VehicleState(posG, roadway, v′)
+    projections = in_lanes(posG, roadway)
+    if length(roadway[previousInd.tag].exits)>0
+        for projection in projections
+            dir = clamp(action.direction,1,length(roadway[previousInd.tag].exits))
+            if roadway[previousInd.tag].exits[dir].target.tag.segment == projection.tag.segment && !isempty(roadway[previousInd.tag].exits)
+                posF = Frenet(projection, roadway)
+                state = VehicleState(posG, posF, v′)
+                #println(posF)
+                return state
+            end
+        end
+    end
+
+    for projection in projections
+        dir = clamp(action.direction,1,length(roadway[previousInd.tag].exits))
+        if  previousInd.tag.segment == projection.tag.segment
+            posF = Frenet(projection, roadway)
+            state = VehicleState(posG, posF, v′)
+            #println(posF)
+            return state
+        end
+    end
+    return state
+end
+
+mutable struct NextState
+    x::Float64
+    y::Float64
+    theta::Float64
+    speed::Float64
+end
+
+function NextState()
+    return NextState(0.0,0.0,0.0,0.0)
+end
+
+function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(veh::Entity{VehicleState, D, Int}, action::NextState,  roadway::Roadway, Δt::Float64)
+    posG = VecSE2(action.x, action.y, action.theta)
+    previousInd = veh.state.posF.roadind
+    
     state = VehicleState(posG, roadway, v′)
     projections = in_lanes(posG, roadway)
     if length(roadway[previousInd.tag].exits)>0
