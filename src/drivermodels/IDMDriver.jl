@@ -13,6 +13,7 @@ mutable struct IDMDriver <: LaneFollowingDriver
     a_max::Float64 # maximum acceleration ability [m/s²]
     d_cmf::Float64 # comfortable deceleration [m/s²] (positive)
     d_max::Float64 # maximum decelleration [m/s²] (positive)
+    max_horizon::Float64
     
     function IDMDriver(;
         σ::Float64     =   NaN,
@@ -24,6 +25,7 @@ mutable struct IDMDriver <: LaneFollowingDriver
         a_max::Float64 =   3.0,
         d_cmf::Float64 =   2.0,
         d_max::Float64 =   9.0,
+        max_horizon::Float64 = 20.0,
         )
 
         retval = new()
@@ -37,6 +39,7 @@ mutable struct IDMDriver <: LaneFollowingDriver
         retval.a_max = a_max
         retval.d_cmf = d_cmf
         retval.d_max = d_max
+        retval.max_horizon = max_horizon
         retval
     end
 end
@@ -49,7 +52,7 @@ end
 function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Frame{Entity{VehicleState, BicycleModel, Int}}, roadway::Roadway, egoid::Int)
     vehicle_index = findfirst(scene, egoid)
 
-    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
+    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront(),max_distance_fore=model.max_horizon)
 
     v_ego = scene[vehicle_index].state.v
     v_oth = NaN
