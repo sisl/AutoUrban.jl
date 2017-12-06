@@ -8,6 +8,7 @@ mutable struct MOBILDriver <: LaneChangeModel
     safe_decel::Float64 # safe deceleration (positive value)
     politeness::Float64 # politeness factor (suggested p ∈ [0.2,0.5])
     advantage_threshold::Float64 # Δaₜₕ
+    max_horizon::Float64
 
     function MOBILDriver(
         timestep::Float64;
@@ -16,6 +17,7 @@ mutable struct MOBILDriver <: LaneChangeModel
         safe_decel::Float64=2.0, # [m/s²]
         politeness::Float64=0.35,
         advantage_threshold::Float64=0.1,
+        max_horizon::Float64=20.0,
         )
 
         retval = new()
@@ -25,6 +27,7 @@ mutable struct MOBILDriver <: LaneChangeModel
         retval.safe_decel = safe_decel
         retval.politeness = politeness
         retval.advantage_threshold = advantage_threshold
+        retval.max_horizon = max_horizon
         retval
     end
 end
@@ -56,8 +59,8 @@ function observe_helper!(model::MOBILDriver, scene::Union{Scene,Frame{Entity{Veh
     lane = roadway[scene[egoid].state.posF.roadind.tag]
     left_lane_exists = (n_lanes_left(lane, roadway) > 0 )
     right_lane_exists = (n_lanes_right(lane, roadway) > 0 )
-    fore_M = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
-    rear_M = get_neighbor_rear_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointFront(), VehicleTargetPointRear())
+    fore_M = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront(),max_distance_fore=retval.max_horizon)
+    rear_M = get_neighbor_rear_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointFront(), VehicleTargetPointRear(),max_distance_rear=retval.max_horizon)
 
     # accel if we do not make a lane change
     accel_M_orig = rand(observe!(reset_hidden_state!(model.mlon), scene, roadway, egoid)).a
@@ -66,7 +69,7 @@ function observe_helper!(model::MOBILDriver, scene::Union{Scene,Frame{Entity{Veh
     advantage_threshold = model.advantage_threshold
     if right_lane_exists
 
-        rear_R = get_neighbor_rear_along_right_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointFront(), VehicleTargetPointRear())
+        rear_R = get_neighbor_rear_along_right_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointFront(), VehicleTargetPointRear(),max_distance_rear=retval.max_horizon)
 
         # candidate position after lane change is over
         footpoint = get_footpoint(convert2vehicle(veh_ego))
@@ -125,7 +128,7 @@ function observe_helper!(model::MOBILDriver, scene::Union{Scene,Frame{Entity{Veh
     end
 
     if left_lane_exists
-        rear_L = get_neighbor_rear_along_left_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointFront(), VehicleTargetPointRear())
+        rear_L = get_neighbor_rear_along_left_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointFront(), VehicleTargetPointRear(),max_distance_rear=retval.max_horizon)
 
         # candidate position after lane change is over
         footpoint = get_footpoint(convert2vehicle(veh_ego))
@@ -183,7 +186,7 @@ function observe_helper!(model::MOBILDriver, scene::Union{Scene,Frame{Entity{Veh
     end
 
     # chack if front vehicle is doing the same action
-    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
+    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront(),max_distance_fore=retval.max_horizon)
     if fore.ind != 0
         if model.dir == DIR_LEFT && scene[fore.ind].state.posF.t > 0.0 && sin(scene[fore.ind].state.posF.ϕ) > 0.0
             model.dir == DIR_MIDDLE
