@@ -25,7 +25,7 @@ mutable struct IDMDriver <: LaneFollowingDriver
         a_max::Float64 =   3.0,
         d_cmf::Float64 =   2.0,
         d_max::Float64 =   9.0,
-        max_horizon::Float64 = 20.0,
+        max_horizon::Float64 = 35.0,
         )
 
         retval = new()
@@ -71,7 +71,7 @@ end
 function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Scene, roadway::Roadway, egoid::Int)
     vehicle_index = findfirst(scene, egoid)
 
-    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront())
+    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront(),max_distance_fore=model.max_horizon)
 
     v_ego = scene[vehicle_index].state.v
     v_oth = NaN

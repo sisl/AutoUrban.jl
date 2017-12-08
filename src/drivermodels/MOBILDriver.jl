@@ -17,7 +17,7 @@ mutable struct MOBILDriver <: LaneChangeModel
         safe_decel::Float64=2.0, # [m/s²]
         politeness::Float64=0.35,
         advantage_threshold::Float64=0.1,
-        max_horizon::Float64=20.0,
+        max_horizon::Float64=35.0,
         )
 
         retval = new()

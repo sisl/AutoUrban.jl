@@ -27,7 +27,7 @@ function move_along_with_direction(roadind::RoadIndex, roadway::Roadway, Δs::Fl
                 lane_prev = prev_lane(lane, roadway, direction)
                 curveind = curveindex_end(lane_prev.curve)
                 roadind = RoadIndex(curveind, lane_prev.tag)
-                return move_along(roadind, roadway, Δs + curvept.s + s_gap, direction)
+                return move_along_with_direction(roadind, roadway, Δs + curvept.s + s_gap, direction=direction)
             else # in the gap between lanes
                 t = (s_gap + curvept.s + Δs) / s_gap
                 curveind = CurveIndex(0, t)
@@ -47,7 +47,7 @@ function move_along_with_direction(roadind::RoadIndex, roadway::Roadway, Δs::Fl
             if curvept.s + Δs ≥ pt_lo.s + s_gap # extends beyond the gap
                 curveind = lane.exits[min(length(lane.exits),direction)].target.ind
                 roadind = RoadIndex(curveind, lane.exits[min(length(lane.exits),direction)].target.tag)
-                return move_along(roadind, roadway, Δs - (lane.curve[end].s + s_gap - curvept.s),direction)
+                return move_along_with_direction(roadind, roadway, Δs - (lane.curve[end].s + s_gap - curvept.s),direction=direction)
             else # in the gap between lanes
                 t = (Δs - (lane.curve[end].s - curvept.s)) / s_gap
                 curveind = CurveIndex(0, t)
