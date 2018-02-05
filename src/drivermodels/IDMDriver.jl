@@ -88,6 +88,7 @@ function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Scene, roadwa
 end
 
 function track_longitudinal!(model::IDMDriver, v_ego::Float64, v_oth::Float64, headway::Float64)
+
     if !isnan(v_oth)
         #@assert !isnan(headway) && headway > 0
         if headway > 0.0
@@ -95,11 +96,11 @@ function track_longitudinal!(model::IDMDriver, v_ego::Float64, v_oth::Float64, h
             s_des = model.s_min + v_ego*model.T - v_ego*Δv / (2*sqrt(model.a_max*model.d_cmf))
             v_ratio = model.v_des > 0.0 ? (v_ego/model.v_des) : 1.0
             model.a = model.a_max * (1.0 - v_ratio^model.δ - (s_des/headway)^2)
-        elseif headway > -3.0
-            acc = -model.d_max
+        # elseif headway > -3.0
+        #    model.a = -model.d_max
         else
             Δv = model.v_des - v_ego
-            acc = Δv*model.k_spd
+            model.a = Δv*model.k_spd
         end
     else
         # no lead vehicle, just drive to match desired speed
@@ -107,6 +108,9 @@ function track_longitudinal!(model::IDMDriver, v_ego::Float64, v_oth::Float64, h
         model.a = Δv*model.k_spd # predicted accel to match target speed
     end
 
+	if isnan(model.a)
+		println("headway: ",headway, " v_oth: ",v_oth, " v_ego: ",v_ego)
+	end
     @assert !isnan(model.a)
 
     model.a = clamp(model.a, -model.d_max, model.a_max)
