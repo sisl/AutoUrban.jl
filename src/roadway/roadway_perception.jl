@@ -1,18 +1,18 @@
 function get_max_curvature(roadind::RoadIndex, roadway::Roadway, Δs::Float64; max_k::Float64 = 0.0, distance::Float64 = -Inf, base_distance::Float64 = 0.0)
     lane = roadway[roadind.tag]
     current_curvept = lane[roadind.ind, roadway]
-    
+
     startind = CURVEINDEX_START
     lastind = curveindex_end(lane.curve)
-    
+
     if abs(current_curvept.k) > abs(max_k) && current_curvept.s >= lane.curve[startind].s && current_curvept.s <= lane.curve[lastind].s
         max_k = current_curvept.k
         distance = 0.0 + base_distance
     end
-    
+
     #println("current s :",current_curvept.s)
     #println("current k :",current_curvept.k)
-    
+
     if current_curvept.s + Δs < 0.0
         for curvept in lane.curve
             if curvept.s < current_curvept.s && abs(curvept.k) > abs(max_k)
@@ -20,11 +20,11 @@ function get_max_curvature(roadind::RoadIndex, roadway::Roadway, Δs::Float64; m
                 distance = (current_curvept.s - curvept.s) + base_distance
             end
         end
-        
+
         if has_prev(lane)
             pt_lo = prev_lane_point(lane, roadway)
             pt_hi = lane.curve[1]
-            s_gap = abs(pt_hi.pos - pt_lo.pos)
+            s_gap = norm(VecE2(pt_hi.pos - pt_lo.pos))
 
             if current_curvept.s + Δs < -s_gap
                 lane_prev = prev_lane(lane, roadway)
@@ -47,8 +47,8 @@ function get_max_curvature(roadind::RoadIndex, roadway::Roadway, Δs::Float64; m
                 max_k = curvept.k
                 distance = (curvept.s - current_curvept.s) + base_distance
             end
-        end   
-        
+        end
+
         if has_next(lane)
             pt_lo = lane.curve[end]
             pt_hi = next_lane_point(lane, roadway)
@@ -98,18 +98,18 @@ end
 function get_max_curvature(roadind::RoadIndex, roadway::Roadway, Δs::Float64; max_k::Float64 = 0.0, distance::Float64 = -Inf, base_distance::Float64 = 0.0, direction::Int = 1)
     lane = roadway[roadind.tag]
     current_curvept = lane[roadind.ind, roadway]
-    
+
     startind = CURVEINDEX_START
     lastind = curveindex_end(lane.curve)
-    
+
     if abs(current_curvept.k) > abs(max_k) && current_curvept.s >= lane.curve[startind].s && current_curvept.s <= lane.curve[lastind].s
         max_k = current_curvept.k
         distance = 0.0 + base_distance
     end
-    
+
     #println("current s :",current_curvept.s)
     #println("current k :",current_curvept.k)
-    
+
     if current_curvept.s + Δs < 0.0
         for curvept in lane.curve
             if curvept.s < current_curvept.s && abs(curvept.k) > abs(max_k)
@@ -117,11 +117,11 @@ function get_max_curvature(roadind::RoadIndex, roadway::Roadway, Δs::Float64; m
                 distance = (current_curvept.s - curvept.s) + base_distance
             end
         end
-        
+
         if has_prev(lane)
             pt_lo = prev_lane_point(lane, roadway,direction)
             pt_hi = lane.curve[1]
-            s_gap = abs(pt_hi.pos - pt_lo.pos)
+            s_gap = norm(VecE2(pt_hi.pos - pt_lo.pos))
 
             if current_curvept.s + Δs < -s_gap
                 lane_prev = prev_lane(lane, roadway,direction)
@@ -144,12 +144,12 @@ function get_max_curvature(roadind::RoadIndex, roadway::Roadway, Δs::Float64; m
                 max_k = curvept.k
                 distance = (curvept.s - current_curvept.s) + base_distance
             end
-        end   
-        
+        end
+
         if has_next(lane)
             pt_lo = lane.curve[end]
             pt_hi = next_lane_point(lane, roadway,direction)
-            s_gap = abs(pt_hi.pos - pt_lo.pos)
+            s_gap = norm(VecE2(pt_hi.pos - pt_lo.pos))
 
             if current_curvept.s + Δs ≥ pt_lo.s + s_gap # extends beyond the gap
                 curveind = lane.exits[min(length(lane.exits),direction)].target.ind
