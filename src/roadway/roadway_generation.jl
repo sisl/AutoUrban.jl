@@ -18,7 +18,7 @@ end
 function get_min_difference_angles(A::Float64,B::Float64)
     b=B
     as=[A A+2*pi A-2*pi];
-    (abs_diff,ind_a)=findmin(abs(as-b))
+    (abs_diff,ind_a)=findmin(abs.(as-b))
     a=as[ind_a]
     return a,b,abs_diff
 end
@@ -30,7 +30,7 @@ function get_min_difference_angles_pos(A::Float64,B::Float64)
     pos_inds = find(x->x>=0,diffs)
     pos_as = as[pos_inds]
     pos_diffs = diffs[pos_inds]
-    pos_diff,ind_a = findmin(abs(pos_diffs))
+    pos_diff,ind_a = findmin(abs.(pos_diffs))
     a = pos_as[ind_a]
     return a,b,pos_diff
 end
@@ -42,7 +42,7 @@ function get_min_difference_angles_neg(A::Float64,B::Float64)
     neg_inds = find(x->x<=0,diffs)
     neg_as = as[neg_inds]
     neg_diffs = diffs[neg_inds]
-    neg_diff,ind_a = findmin(abs(neg_diffs))
+    neg_diff,ind_a = findmin(abs.(neg_diffs))
     neg_diff = - neg_diff
     a = neg_as[ind_a]
     return a,b,neg_diff
