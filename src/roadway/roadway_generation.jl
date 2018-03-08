@@ -86,7 +86,7 @@ function get_center_of_circle(A::VecSE2, B::VecSE2)
     x = -((-x2*cos(θ2)*sin(θ1)+x1*cos(θ1)*sin(θ2)+y1*sin(θ1)*sin(θ2)-y2*sin(θ1)*sin(θ2))/(cos(θ2)*sin(θ1)-cos(θ1)*sin(θ2)))
     y = -((-x1*cos(θ1)*cos(θ2)+x2*cos(θ1)*cos(θ2)-y1*cos(θ2)*sin(θ1)+y2*cos(θ1)*sin(θ2))/(cos(θ2)*sin(θ1)-cos(θ1)*sin(θ2)))
 
-    if abs(abs(angle_diff)-pi) < ANG_THD 
+    if abs(abs(angle_diff)-pi) < ANG_THD
         x = (x1+x2)/2
         y = (y1+y2)/2
     end
@@ -96,12 +96,12 @@ end
 function connect_two_points_by_circle(A::VecSE2, B::VecSE2;s_base::Float64=0.0)
     ncurvepts_per_turn = 25
 
-    distance = abs(A-B)
-    
+    distance = norm(VecE2(A-B))
+
     C = get_center_of_circle(A, B)
     CA = VecE2(A.x-C.x,A.y-C.y)
     CB = VecE2(B.x-C.x,B.y-C.y)
-    
+
     if (CA.x>ANG_THD && sin(A.θ)>ANG_THD) || (CA.x<-ANG_THD && sin(A.θ)<-ANG_THD) || (CA.y<-ANG_THD && cos(A.θ)>ANG_THD) || (CA.y>ANG_THD && cos(A.θ)<-ANG_THD)
         attangle_a,attangle_b,angle_diff = get_min_difference_angles_pos(A.θ,B.θ)
         posangle_a,posangle_b,angle_diff = get_min_difference_angles_pos(atan2(CA.y,CA.x),atan2(CB.y,CB.x))
@@ -109,9 +109,9 @@ function connect_two_points_by_circle(A::VecSE2, B::VecSE2;s_base::Float64=0.0)
         attangle_a,attangle_b,angle_diff = get_min_difference_angles_neg(A.θ,B.θ)
         posangle_a,posangle_b,angle_diff = get_min_difference_angles_neg(atan2(CA.y,CA.x),atan2(CB.y,CB.x))
     end
-    
+
     curvepts = Array{CurvePt}(ncurvepts_per_turn)
-    
+
     #@assert abs(angle_diff) > ANG_THD
     if abs(abs(angle_diff)-pi) < ANG_THD
         radius = distance/2
@@ -136,11 +136,11 @@ end
 function connect_two_points(A::VecSE2, B::VecSE2)
     #connect any two points with one points array
     _,_,abs_diff = get_min_difference_angles(B.θ,A.θ)
-    
+
     curvepts = Array{CurveP}(0)
     push!(curvepts,CurvePt(A,  0.0,0.0,0.0))
     if abs_diff < ANG_THD
-        push!(curvepts,CurvePt(B,  abs(A-B),0.0,0.0))   
+        push!(curvepts,CurvePt(B,  norm(VecE2(A-B)),0.0,0.0))
     else
         if abs(abs_diff - pi) < ANG_THD
             #println("difference is pi")
@@ -165,8 +165,8 @@ function connect_two_points(A::VecSE2, B::VecSE2)
         else
             #println("difference is general")
             I = get_intersection_point(A, B)
-            dis1 = abs(A-I)
-            dis2 = abs(B-I)
+            dis1 = norm(VecE2(A-I))
+            dis2 = norm(VecE2(B-I))
             AI = VecE2(I.x-A.x,I.y-A.y)
             BI = VecE2(I.x-B.x,I.y-B.y)
             dis_diff = abs(dis1-dis2)
@@ -181,7 +181,7 @@ function connect_two_points(A::VecSE2, B::VecSE2)
                 push!(curvepts,CurvePt(B,total_length,0.0,0.0))
             elseif (dis1-dis2 >= 0.0 && projection_length >= 0.0) || (dis1-dis2 <= 0.0 && projection_length <= 0.0)
                 #println("1")
-                P = VecSE2(VecE2(A + polar(dis_diff,A.θ)),A.θ)   
+                P = VecSE2(VecE2(A + polar(dis_diff,A.θ)),A.θ)
                 push!(curvepts,CurvePt(P, dis_diff,0.0,0.0))
                 circlepts,total_length = connect_two_points_by_circle(P, B;s_base = dis_diff)
                 curvepts = vcat(curvepts,circlepts)
@@ -192,25 +192,25 @@ function connect_two_points(A::VecSE2, B::VecSE2)
                 circlepts,total_length = connect_two_points_by_circle(A, P;s_base = 0.0)
                 curvepts = vcat(curvepts,circlepts)
                 push!(curvepts,CurvePt(P, total_length,0.0,0.0))
-                push!(curvepts,CurvePt(B,total_length+dis_diff,0.0,0.0)) 
+                push!(curvepts,CurvePt(B,total_length+dis_diff,0.0,0.0))
             #else
             #    println("3")
             #    circlepts,total_length = connect_two_points_by_circle(A, B;s_base = 0.0)
             #    curvepts = vcat(curvepts,circlepts)
             end
         end
-    end 
+    end
     return curvepts
 end
 
 function connect_two_points_seperate(A::VecSE2, B::VecSE2)
     #connect any two points with an array of curpve points
     _,_,abs_diff = get_min_difference_angles(B.θ,A.θ)
-    
+
     curvepts = Array{CurvePt}[]
     if abs_diff < ANG_THD
         push!(curvepts,[CurvePt(A,  0.0,0.0,0.0)])
-        push!(curvepts[1],CurvePt(B,  abs(A-B),0.0,0.0))   
+        push!(curvepts[1],CurvePt(B,  norm(VecE2(A-B)),0.0,0.0))
     else
         if abs(abs_diff - pi) < ANG_THD
             #println("difference is pi")
@@ -236,8 +236,8 @@ function connect_two_points_seperate(A::VecSE2, B::VecSE2)
         else
             #println("difference is general")
             I = get_intersection_point(A, B)
-            dis1 = abs(A-I)
-            dis2 = abs(B-I)
+            dis1 = norm(VecE2(A-I))
+            dis2 = norm(VecE2(B-I))
             AI = VecE2(I.x-A.x,I.y-A.y)
             BI = VecE2(I.x-B.x,I.y-B.y)
             dis_diff = abs(dis1-dis2)
@@ -257,7 +257,7 @@ function connect_two_points_seperate(A::VecSE2, B::VecSE2)
                 elseif (dis1-dis2 >= 0.0 && projection_length >= 0.0) || (dis1-dis2 <= 0.0 && projection_length <= 0.0)
                     #println("1")
                     push!(curvepts,[CurvePt(A,  0.0,0.0,0.0)])
-                    P = VecSE2(VecE2(A + polar(dis_diff,A.θ)),A.θ)   
+                    P = VecSE2(VecE2(A + polar(dis_diff,A.θ)),A.θ)
                     push!(curvepts[1],CurvePt(P, dis_diff,0.0,0.0))
                     circlepts,total_length = connect_two_points_by_circle(P, B;s_base = 0.0)
                     push!(curvepts,circlepts)
@@ -267,11 +267,11 @@ function connect_two_points_seperate(A::VecSE2, B::VecSE2)
                     circlepts,total_length = connect_two_points_by_circle(A, P;s_base = 0.0)
                     push!(curvepts,circlepts)
                     push!(curvepts,[CurvePt(P, 0.0,0.0,0.0)])
-                    push!(curvepts[2],CurvePt(B,dis_diff,0.0,0.0)) 
+                    push!(curvepts[2],CurvePt(B,dis_diff,0.0,0.0))
                 end
             end
         end
-    end 
+    end
     return curvepts
 end
 
@@ -293,7 +293,7 @@ function connect_two_lane_general!(source::Lane, dest::Lane,seg_id::Int,lane_wid
                                         boundary_left=boundary_left, boundary_right=boundary_right,
                                         )
     connect!(source, seg12.lanes[1])
-    connect!(seg12.lanes[1], dest) 
+    connect!(seg12.lanes[1], dest)
     return seg12
 end
 
@@ -315,10 +315,10 @@ function connect_two_lane_general!(source::Lane, dest::Lane,roadway::Roadway,lan
         tag12 = LaneTag(seg_id,1)
         seg12.lanes[1] = Lane(tag12, curvepts, width=lane_width,
                                         boundary_left=boundary_left, boundary_right=boundary_right,
-                                        )  
+                                        )
         push!(segs,seg12)
     end
-    
+
     before = source
     next = nothing
     for i = 1:length(segs)
@@ -358,7 +358,7 @@ function connect_two_seg!(source::RoadSegment,dest::RoadSegment,roadway::Roadway
     end
     segs = []
     seg_id = length(roadway.segments)
-    
+
     for i = 1:length(curveptsss[1])
         seg_id += 1
         seg12 = RoadSegment(seg_id, Array{Lane}(length(connections)))
@@ -366,11 +366,11 @@ function connect_two_seg!(source::RoadSegment,dest::RoadSegment,roadway::Roadway
             tag12 = LaneTag(seg_id,j)
             seg12.lanes[j] = Lane(tag12, curveptsss[j][i], width=source.lanes[connections[j][1]].width,
                                         boundary_left=boundary_left, boundary_right=boundary_right,
-                                        )  
+                                        )
         end
         push!(segs,seg12)
     end
-    
+
 
     for i = 1:length(connections)
         before = source.lanes[connections[i][1]]
@@ -390,7 +390,7 @@ function connect_two_seg!(source::RoadSegment,dest::RoadSegment,roadway::Roadway
     for i = 1:length(segs)
         push!(roadway.segments, segs[i])
     end
-    
+
 end
 
 function connect_two_seg_general!(source::RoadSegment,dest::RoadSegment,roadway::Roadway;
@@ -431,7 +431,7 @@ function connect_two_seg_general!(source::RoadSegment,dest::RoadSegment,roadway:
     end
     segs = []
     seg_id = length(roadway.segments)
-    
+
     for i = 1:length(curveptsss[1])
         seg_id += 1
         seg12 = RoadSegment(seg_id, Array{Lane}(length(connections)))
@@ -439,7 +439,7 @@ function connect_two_seg_general!(source::RoadSegment,dest::RoadSegment,roadway:
             tag12 = LaneTag(seg_id,j)
             seg12.lanes[j] = Lane(tag12, curveptsss[j][i], width=source.lanes[connections[j][1]].width,
                                         boundary_left=boundary_left, boundary_right=boundary_right,
-                                        )  
+                                        )
         end
         push!(segs,seg12)
     end
@@ -468,11 +468,11 @@ function connect_two_seg_general!(source::RoadSegment,dest::RoadSegment,roadway:
             before = next
         end
     end
-    
+
     for i = 1:length(segs)
         push!(roadway.segments, segs[i])
     end
-    
+
 end
 
 function connect_general!(source::Lane, dest::Lane,direction::Tuple{Int,Int}=(1,1))
@@ -490,21 +490,21 @@ function connect_general!(source::Lane, dest::Lane,direction::Tuple{Int,Int}=(1,
 
         unshift!(source.exits,   LaneConnection(true,  cindS, RoadIndex(cindD, dest.tag)))
         unshift!(dest.exits, LaneConnection(true, cindD, RoadIndex(cindS, source.tag)))
-        (source, dest)    
+        (source, dest)
     elseif direction[1]==-1 && direction[2] ==1
         cindS = CURVEINDEX_START
         cindD = CURVEINDEX_START
 
         unshift!(source.entrances,   LaneConnection(false,  cindS, RoadIndex(cindD, dest.tag)))
         unshift!(dest.entrances, LaneConnection(false, cindD, RoadIndex(cindS, source.tag)))
-        (source, dest)  
+        (source, dest)
     elseif direction[1]==-1 && direction[2] ==-1
         cindS = CURVEINDEX_START
         cindD = curveindex_end(dest.curve)
 
         unshift!(source.entrances,   LaneConnection(false,  cindS, RoadIndex(cindD, dest.tag)))
         unshift!(dest.exits, LaneConnection(true, cindD, RoadIndex(cindS, source.tag)))
-        (source, dest)    
+        (source, dest)
     end
 end
 
@@ -531,7 +531,7 @@ function add_connection!(connection::Connection,roadway::Roadway;
     end
     segs = []
     seg_id = length(roadway.segments)
-    
+
     for i = 1:length(curveptsss[1])
         seg_id += 1
         seg12 = RoadSegment(seg_id, Array{Lane}(length(connection.laneConnections)))
@@ -542,11 +542,11 @@ function add_connection!(connection::Connection,roadway::Roadway;
             tag12 = LaneTag(seg_id,j)
             seg12.lanes[j] = Lane(tag12, curveptsss[j][i], width=source.lanes[connection.laneConnections[j][1]].width,
                                         boundary_left=boundary_left, boundary_right=boundary_right,
-                                        )  
+                                        )
         end
         push!(segs,seg12)
     end
-    
+
 
     for i = 1:length(connection.laneConnections)
         before = source.lanes[connection.laneConnections[i][1]]
@@ -565,7 +565,7 @@ function add_connection!(connection::Connection,roadway::Roadway;
     for i = 1:length(segs)
         push!(roadway.segments, segs[i])
     end
-    
+
 end
 
 
@@ -584,8 +584,8 @@ function gen_connected_lanes(;nlanes::Int=1,roadlength::Float64=5.0,
     boundary_rightmost::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_middle::LaneBoundary=LaneBoundary(:broken, :white)
     )
-    
-    
+
+
     segments = RoadSegment[]
     seg1 = gen_straight_segment(1, nlanes, roadlength,
                                                 origin=origin1, lane_widths=lane_widths,
@@ -597,11 +597,11 @@ function gen_connected_lanes(;nlanes::Int=1,roadlength::Float64=5.0,
                                                 boundary_leftmost=boundary_leftmost,
                                                 boundary_rightmost=boundary_rightmost,
                                                 boundary_middle=boundary_middle)
-    
+
     retval = Roadway()
     push!(retval.segments, seg1)
     push!(retval.segments, seg2)
-    
+
     boundary_left =  boundary_middle
     boundary_right = boundary_middle
 
@@ -621,8 +621,8 @@ function gen_intersection(;nlanes::Int=2,roadlength::Float64=5.0,
     boundary_rightmost::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_middle::LaneBoundary=LaneBoundary(:broken, :white)
     )
-    
-    
+
+
     segments = RoadSegment[]
     seg1 = gen_straight_segment(1, nlanes, roadlength,
                                                 origin=origin, lane_widths=lane_widths,
@@ -630,51 +630,51 @@ function gen_intersection(;nlanes::Int=2,roadlength::Float64=5.0,
                                                 boundary_rightmost=boundary_rightmost,
                                                 boundary_middle=boundary_middle)
     seg2 = gen_straight_segment(2, nlanes, roadlength,
-                      origin=VecSE2(origin.x+roadlength+0.5*lane_width,origin.y-0.5*lane_width,-pi/2), 
+                      origin=VecSE2(origin.x+roadlength+0.5*lane_width,origin.y-0.5*lane_width,-pi/2),
                                                 lane_widths=lane_widths,
                                                 boundary_leftmost=boundary_leftmost,
                                                 boundary_rightmost=boundary_rightmost,
                                                 boundary_middle=boundary_middle)
     seg3 = gen_straight_segment(3, nlanes, roadlength,
-        origin=VecSE2(origin.x+roadlength+(2*nlanes-0.5)*lane_width,origin.y-roadlength-0.5*lane_width,pi/2), 
+        origin=VecSE2(origin.x+roadlength+(2*nlanes-0.5)*lane_width,origin.y-roadlength-0.5*lane_width,pi/2),
                                                 lane_widths=lane_widths,
                                                 boundary_leftmost=boundary_leftmost,
                                                 boundary_rightmost=boundary_rightmost,
                                                 boundary_middle=boundary_middle)
     seg4 = gen_straight_segment(4, nlanes, roadlength,
-        origin=VecSE2(origin.x+roadlength+2*nlanes*lane_width,origin.y,0.0), 
+        origin=VecSE2(origin.x+roadlength+2*nlanes*lane_width,origin.y,0.0),
                                                 lane_widths=lane_widths,
                                                 boundary_leftmost=boundary_leftmost,
                                                 boundary_rightmost=boundary_rightmost,
                                                 boundary_middle=boundary_middle)
-    
+
     seg5 = gen_straight_segment(5, nlanes, roadlength,
-        origin=VecSE2(origin.x+roadlength+2*nlanes*lane_width+roadlength,origin.y+(2*nlanes-1.0)lane_width,pi), 
+        origin=VecSE2(origin.x+roadlength+2*nlanes*lane_width+roadlength,origin.y+(2*nlanes-1.0)lane_width,pi),
                                                 lane_widths=lane_widths,
                                                 boundary_leftmost=boundary_leftmost,
                                                 boundary_rightmost=boundary_rightmost,
                                                 boundary_middle=boundary_middle)
-    
+
     seg6 = gen_straight_segment(6, nlanes, roadlength,
-        origin=VecSE2(origin.x+roadlength+(2*nlanes-0.5)*lane_width,origin.y+(2*nlanes-0.5)*lane_width,pi/2), 
+        origin=VecSE2(origin.x+roadlength+(2*nlanes-0.5)*lane_width,origin.y+(2*nlanes-0.5)*lane_width,pi/2),
                                                 lane_widths=lane_widths,
                                                 boundary_leftmost=boundary_leftmost,
                                                 boundary_rightmost=boundary_rightmost,
                                                 boundary_middle=boundary_middle)
     seg7 = gen_straight_segment(7, nlanes, roadlength,
-    origin=VecSE2(origin.x+roadlength+0.5*lane_width,origin.y+(2*nlanes-0.5)*lane_width+roadlength,-pi/2), 
+    origin=VecSE2(origin.x+roadlength+0.5*lane_width,origin.y+(2*nlanes-0.5)*lane_width+roadlength,-pi/2),
                                                 lane_widths=lane_widths,
                                                 boundary_leftmost=boundary_leftmost,
                                                 boundary_rightmost=boundary_rightmost,
                                                 boundary_middle=boundary_middle)
     seg8 = gen_straight_segment(8, nlanes, roadlength,
-        origin=VecSE2(origin.x+roadlength,origin.y+(2*nlanes-1.0)*lane_width,pi), 
+        origin=VecSE2(origin.x+roadlength,origin.y+(2*nlanes-1.0)*lane_width,pi),
                                                 lane_widths=lane_widths,
                                                 boundary_leftmost=boundary_leftmost,
                                                 boundary_rightmost=boundary_rightmost,
                                                 boundary_middle=boundary_middle)
-    
-     
+
+
     retval = Roadway()
     push!(retval.segments, seg1)
     push!(retval.segments, seg2)
@@ -684,8 +684,8 @@ function gen_intersection(;nlanes::Int=2,roadlength::Float64=5.0,
     push!(retval.segments, seg6)
     push!(retval.segments, seg7)
     push!(retval.segments, seg8)
-    
-    
+
+
     add_junction!(junction,retval)
     return retval,junction
 end
@@ -735,7 +735,7 @@ function gen_loop_roadway(nlanes::Int;
     push!(retval.segments, seg2)
     push!(retval.segments, seg3)
     push!(retval.segments, seg4)
-    
+
     for i=1:3
          connect_two_seg!(retval.segments[i],retval.segments[i+1],retval)
     end
@@ -745,7 +745,7 @@ end
 
 function add_line!(origin::VecSE2,nlanes::Int,laneLength::Float64,roadway::Roadway;
     lane_width::Float64=DEFAULT_LANE_WIDTH, # [m]
-    lane_widths::Vector{Float64} = fill(lane_width, nlanes),    
+    lane_widths::Vector{Float64} = fill(lane_width, nlanes),
     boundary_leftmost::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_rightmost::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_middle::LaneBoundary=LaneBoundary(:broken, :white)

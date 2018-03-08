@@ -21,7 +21,7 @@ function move_along_with_direction(roadind::RoadIndex, roadway::Roadway, Δs::Fl
         if has_prev(lane)
             pt_lo = prev_lane_point(lane, roadway, direction)
             pt_hi = lane.curve[1]
-            s_gap = abs(pt_hi.pos - pt_lo.pos)
+            s_gap = norm(VecE2(pt_hi.pos - pt_lo.pos))
 
             if curvept.s + Δs < -s_gap
                 lane_prev = prev_lane(lane, roadway, direction)
@@ -42,7 +42,7 @@ function move_along_with_direction(roadind::RoadIndex, roadway::Roadway, Δs::Fl
         if has_next(lane)
             pt_lo = lane.curve[end]
             pt_hi = next_lane_point(lane, roadway, direction)
-            s_gap = abs(pt_hi.pos - pt_lo.pos)
+            s_gap = norm(VecE2(pt_hi.pos - pt_lo.pos))
 
             if curvept.s + Δs ≥ pt_lo.s + s_gap # extends beyond the gap
                 curveind = lane.exits[min(length(lane.exits),direction)].target.ind
@@ -87,7 +87,7 @@ function in_lanes(posG::VecSE2, roadway::Roadway)
             roadproj = proj(posG, lane, roadway, move_along_curves=false)
             targetlane = roadway[roadproj.tag]
             footpoint = targetlane[roadproj.curveproj.ind, roadway]
-            dist = abs2(posG - footpoint.pos)
+            dist = normsquared(VecE2(posG - footpoint.pos))
             if dist < targetlane.width/2.0
                 push!(projections,roadproj)
             end
@@ -96,4 +96,3 @@ function in_lanes(posG::VecSE2, roadway::Roadway)
 
     return projections
 end
-
