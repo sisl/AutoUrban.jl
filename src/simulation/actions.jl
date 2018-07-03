@@ -94,13 +94,22 @@ function Base.copy!(v::Vector{Float64}, a::AccelSteeringDirection)
     v[3] = convert(Float64,a.direction)
     v
 end
-#function propagate(veh::Entity{VehicleState, BicycleModel, Int}, action::AccelSteeringAngle, roadway::Roadway, Δt::Float64)
-function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(veh::Entity{VehicleState, D, Int}, action::AccelSteeringDirection, roadway::Roadway, Δt::Float64)
-    previousInd = veh.state.posF.roadind
-    
+
+function AutomotiveDrivingModels.propagate(veh::Entity{VehicleState, VehicleDef, Int}, action::AccelSteeringDirection, roadway::Roadway, Δt::Float64)
+    L = veh.def.length
+    l = -veh.def.length/2
+    return AutomotiveDrivingModels.propagate_helper(veh, action, roadway, Δt, L, l)
+end
+
+function AutomotiveDrivingModels.propagate(veh::Entity{VehicleState, BicycleModel, Int}, action::AccelSteeringDirection, roadway::Roadway, Δt::Float64)
     L = veh.def.a + veh.def.b
     l = -veh.def.b
+    return AutomotiveDrivingModels.propagate_helper(veh, action, roadway, Δt, L, l)
+end
 
+function AutomotiveDrivingModels.propagate_helper{D<:Union{VehicleDef, BicycleModel}}(veh::Entity{VehicleState, D, Int}, action::AccelSteeringDirection, roadway::Roadway, Δt::Float64, L::Float64, l::Float64)
+    previousInd = veh.state.posF.roadind
+    
     a = action.a # accel [m/s²]
     δ = action.δ # steering wheel angle [rad]
 
