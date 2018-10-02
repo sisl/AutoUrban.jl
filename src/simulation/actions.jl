@@ -6,13 +6,13 @@ end
 Base.show(io::IO, a::LatLonAccelDirection) = @printf(io, "LatLonAccelDirection(%6.3f, %6.3f, %d)", a.a_lat, a.a_lon, a.direction)
 Base.length(::Type{LatLonAccelDirection}) = 3
 Base.convert(::Type{LatLonAccelDirection}, v::Vector{Float64}) = LatLonAccel(v[1], v[2],convert(Int,v[3]))
-function Base.copy!(v::Vector{Float64}, a::LatLonAccel)
+function Base.copyto!(v::Vector{Float64}, a::LatLonAccel)
     v[1] = a.a_lat
     v[2] = a.a_lon
     v[3] = convert(Float64,a.direction)
     v
 end
-function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(veh::Entity{VehicleState, D, Int}, action::LatLonAccelDirection,  roadway::Roadway, Δt::Float64)
+function AutomotiveDrivingModels.propagate(veh::Entity{VehicleState, D, Int}, action::LatLonAccelDirection,  roadway::Roadway, Δt::Float64) where {D<:Union{VehicleDef, BicycleModel}}
     previousInd = veh.state.posF.roadind
     a_lat = action.a_lat
     a_lon = action.a_lon
@@ -32,7 +32,7 @@ function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(v
     dt₂ = dt + a_lat*ΔT
     speed₂ = sqrt(dt₂*dt₂ + ds₂*ds₂)
     v₂ = sign(ds₂)*speed₂
-    ϕ₂ = atan2(dt₂, ds₂) + (v₂ < 0.0)*π # handle negative speeds
+    ϕ₂ = atan(dt₂, ds₂) + (v₂ < 0.0)*π # handle negative speeds
     roadind = move_along_with_direction(veh.state.posF.roadind, roadway, Δs, direction = action.direction)
     if t+Δt <= roadway[roadind.tag].width/2.0
         posF = Frenet(roadind, roadway, t=t+Δt, ϕ = ϕ₂)
@@ -88,14 +88,14 @@ end
 Base.show(io::IO, a::AccelSteeringDirection) = @printf(io, "AccelSteeringDirection(%6.3f,%6.3f,%d)", a.a, a.δ,a.direction)
 Base.length(::Type{AccelSteeringDirection}) = 3
 Base.convert(::Type{AccelSteeringDirection}, v::Vector{Float64}) = AccelSteeringDirection(v[1], v[2], convert(Int,v[3]))
-function Base.copy!(v::Vector{Float64}, a::AccelSteeringDirection)
+function Base.copyto!(v::Vector{Float64}, a::AccelSteeringDirection)
     v[1] = a.a
     v[2] = a.δ
     v[3] = convert(Float64,a.direction)
     v
 end
 #function propagate(veh::Entity{VehicleState, BicycleModel, Int}, action::AccelSteeringAngle, roadway::Roadway, Δt::Float64)
-function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(veh::Entity{VehicleState, D, Int}, action::AccelSteeringDirection, roadway::Roadway, Δt::Float64)
+function AutomotiveDrivingModels.propagate(veh::Entity{VehicleState, D, Int}, action::AccelSteeringDirection, roadway::Roadway, Δt::Float64) where {D<:Union{VehicleDef, BicycleModel}}
     previousInd = veh.state.posF.roadind
     
     L = veh.def.a + veh.def.b
@@ -169,7 +169,7 @@ function NextState()
     return NextState(0.0,0.0,0.0,0.0,1)
 end
 
-function AutomotiveDrivingModels.propagate{D<:Union{VehicleDef, BicycleModel}}(veh::Entity{VehicleState, D, Int}, action::NextState,  roadway::Roadway, Δt::Float64)
+function AutomotiveDrivingModels.propagate(veh::Entity{VehicleState, D, Int}, action::NextState,  roadway::Roadway, Δt::Float64) where {D<:Union{VehicleDef, BicycleModel}}
     previousInd = veh.state.posF.roadind
 
     posG = VecSE2(action.x, action.y, action.theta)

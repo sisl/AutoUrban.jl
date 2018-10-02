@@ -23,9 +23,9 @@ function get_commands!(model::MultiPtsDriver,scene::Union{Scene,Frame{Entity{Veh
 #        qEnd=[xdata[i] ydata[i] 0 0 0]';
 #        Y,u_solved,converged=computeTrajectory(qStart,qEnd,"xy",Δt,steermax,steerdotmax,accmax);
     if i==numPts
-        qEnd=[xdata[i] ydata[i] atan2((ydata[i]-ydata[i-1]),(xdata[i]-xdata[i-1])) 0 0]';  
+        qEnd=[xdata[i] ydata[i] atan((ydata[i]-ydata[i-1]),(xdata[i]-xdata[i-1])) 0 0]';  
     else
-        qEnd=[xdata[i] ydata[i] atan2((ydata[i+1]-ydata[i]),(xdata[i+1]-xdata[i])) 0 0]';
+        qEnd=[xdata[i] ydata[i] atan((ydata[i+1]-ydata[i]),(xdata[i+1]-xdata[i])) 0 0]';
     end
     #println("qStart : ", qStart)
     #println("qEnd : ", qEnd)
@@ -61,7 +61,7 @@ function get_commands!(model::MultiPtsDriver,scene::Union{Scene,Frame{Entity{Veh
     model.commands=u_solved1
 end
 
-function computeTrajectory(veh::Entity,initialXYPKV::Matrix{Float64},targetXYPKV::Matrix{Float64},mode::String,Δt::Float64,kmax::Float64,kdotmax::Float64,vdotmax::Float64)
+function computeTrajectory(veh::Entity,initialXYPKV::AbstractArray,targetXYPKV::AbstractArray,mode::String,Δt::Float64,kmax::Float64,kdotmax::Float64,vdotmax::Float64)
     h=Δt
     N=2
     #x=sqrt.((initialXYPKV[1]-targetXYPKV[1])^2+(initialXYPKV[2]-targetXYPKV[2])^2)
@@ -80,7 +80,7 @@ function computeTrajectory(veh::Entity,initialXYPKV::Matrix{Float64},targetXYPKV
     return Y,u_solved,converged,cost
 end
 
-function solveTrajXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,uguess::Matrix{Float64},kmax::Float64,kdotmax::Float64,vdotmax::Float64,targetXYPKV::Matrix{Float64},constraint_mode::String)
+function solveTrajXYPKVLinear(veh::Entity,q0::AbstractArray,N::Int,h::Float64,uguess::AbstractArray,kmax::Float64,kdotmax::Float64,vdotmax::Float64,targetXYPKV::AbstractArray,constraint_mode::String)
     
     w=copy(uguess)
     stepsize_multiplier = 0.5
@@ -211,7 +211,7 @@ function solveTrajXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,
     return Y,uvec,converged,bestCost
 end
 
-function simXYPKVLinear(veh::Entity,q0::Matrix{Float64},N::Int,h::Float64,u::Matrix{Float64},kmax::Float64,kdotmax::Float64,vdotmax::Float64)
+function simXYPKVLinear(veh::Entity,q0::AbstractArray,N::Int,h::Float64,u::AbstractArray,kmax::Float64,kdotmax::Float64,vdotmax::Float64)
     M = length(u);
     Y = zeros(N+1,5);
     Y[1,:] = q0;
