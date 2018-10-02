@@ -165,27 +165,27 @@ function handle_junction!(r,id,junction,roadway)
             laneLink["from"] = convert_JuliaLaneId2VTDLaneId(LaneTag(connection.source,connection.laneConnections[i][1]),roadway) 
             laneLink["to"] = convert_JuliaLaneId2VTDLaneId(LaneTag(connection.path,i),roadway)
         end
-        for road in find(r,"road")
+        for road in findall(r,"road")
             if parse(Int,road["id"]) == connection.source
-                for successor in find(road,"link/successor")
+                for successor in findall(road,"link/successor")
                     successor["elementType"] = "junction"
                     successor["elementId"] = junctionId
                     delete!(successor, "contactPoint")
                 end
-                for successor in find(road,"lanes/laneSection/right/lane/link/successor")
+                for successor in findall(road,"lanes/laneSection/right/lane/link/successor")
                     unlink!(successor)
                 end
             end
             if parse(Int,road["id"]) == connection.path
                 road["junction"] = junctionId
-                for roadi in find(r,"road")
+                for roadi in findall(r,"road")
                     if parse(Int,roadi["id"]) == roadway.segments[connection.path].lanes[1].exits[1].target.tag.segment
-                        for predecessor in find(roadi,"link/predecessor")
+                        for predecessor in findall(roadi,"link/predecessor")
                             predecessor["elementType"] = "junction"
                             predecessor["elementId"] = junctionId
                             delete!(predecessor, "contactPoint")
                         end
-                        for predecessor in find(roadi,"lanes/laneSection/right/lane/link/predecessor")
+                        for predecessor in findall(roadi,"lanes/laneSection/right/lane/link/predecessor")
                             unlink!(predecessor)
                         end  
                     end     

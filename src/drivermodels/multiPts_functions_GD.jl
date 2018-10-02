@@ -23,9 +23,9 @@ function get_commands!(model::MultiPtsDriver,scene::Union{Scene,Frame{Entity{Veh
 #        qEnd=[xdata[i] ydata[i] 0 0 0]';
 #        Y,u_solved,converged=computeTrajectory(qStart,qEnd,"xy",Δt,steermax,steerdotmax,accmax);
     if i==numPts
-        qEnd=[xdata[i] ydata[i] atan2((ydata[i]-ydata[i-1]),(xdata[i]-xdata[i-1])) 0 0]';  
+        qEnd=[xdata[i] ydata[i] atan((ydata[i]-ydata[i-1]),(xdata[i]-xdata[i-1])) 0 0]';  
     else
-        qEnd=[xdata[i] ydata[i] atan2((ydata[i+1]-ydata[i]),(xdata[i+1]-xdata[i])) 0 0]';
+        qEnd=[xdata[i] ydata[i] atan((ydata[i+1]-ydata[i]),(xdata[i+1]-xdata[i])) 0 0]';
     end
     #println("qStart : ", qStart)
     #println("qEnd : ", qEnd)

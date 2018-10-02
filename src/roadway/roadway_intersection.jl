@@ -81,7 +81,7 @@ function move_along_with_direction(roadind::RoadIndex, roadway::Roadway, Δs::Fl
 end
 
 function in_lanes(posG::VecSE2, roadway::Roadway)
-    projections = Array{RoadProjection}(0)
+    projections = Array{RoadProjection}(undef, 0)
     for seg in roadway.segments
         for lane in seg.lanes
             roadproj = proj(posG, lane, roadway, move_along_curves=false)

@@ -5,15 +5,17 @@ os:
   - linux
   # - osx
 julia:
-  - 0.6
+  - 0.7
+  - 1.0
   - nightly
 matrix:
   allow_failures:
     - julia: nightly
+
 notifications:
   email: false
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'Pkg.clone(pwd()); Pkg.clone("https://github.com/tawheeler/Vec.jl.git"); Pkg.clone("https://github.com/sisl/Records.jl.git"); Pkg.add("Colors"); Pkg.add("Cairo"); Pkg.add("Reel"); Pkg.clone("https://github.com/tawheeler/AutomotiveDrivingModels.jl.git"); Pkg.clone("https://github.com/sisl/AutoViz.jl.git"); Pkg.add("EzXML"); Pkg.build("AutoUrban"); Pkg.test("AutoUrban"; coverage=true)'
+  - julia --project --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/sisl/Vec.jl")); Pkg.add(PackageSpec(url="https://github.com/sisl/Records.jl")); Pkg.add(PackageSpec(url="https://github.com/sisl/AutomotiveDrivingModels.jl")); Pkg.add(PackageSpec(url="https://github.com/sisl/AutoViz.jl")); Pkg.build("AutoUrban"); Pkg.test("AutoUrban"; coverage=true)'
 after_success:
-  - julia -e 'cd(Pkg.dir("AutoUrban")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+  - julia --project -e 'using Pkg; cd(Pkg.dir("AutoViz")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'

@@ -5,6 +5,8 @@ module AutoUrban
 using AutomotiveDrivingModels
 using AutoViz
 using EzXML
+using Printf
+using LinearAlgebra
 
 include("simulation/main.jl")
 include("drivermodels/main.jl")
