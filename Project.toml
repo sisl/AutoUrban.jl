@@ -1,7 +1,7 @@
 name = "AutoUrban"
 uuid = "1385418a-9289-5a49-ab93-843b508de4cb"
 repo = "https://github.com/sisl/AutoUrban.jl"
-version = "0.0.0"
+version = "0.2.0"
 
 [deps]
 EzXML = "8f5d6c58-4d21-5cfd-889c-e3ad7ee6a615"
