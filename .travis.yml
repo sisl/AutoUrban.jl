@@ -20,8 +20,8 @@ addons:
 
 notifications:
   email: false
-script:
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --project --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/sisl/Vec.jl")); Pkg.add(PackageSpec(url="https://github.com/sisl/Records.jl")); Pkg.add(PackageSpec(url="https://github.com/sisl/AutomotiveDrivingModels.jl")); Pkg.add(PackageSpec(url="https://github.com/sisl/AutoViz.jl")); Pkg.build("AutoUrban"); Pkg.test("AutoUrban"; coverage=true)'
+# script:
+  # - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  # - julia --project --check-bounds=yes -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/sisl/Vec.jl")); Pkg.add(PackageSpec(url="https://github.com/sisl/Records.jl")); Pkg.add(PackageSpec(url="https://github.com/sisl/AutomotiveDrivingModels.jl")); Pkg.add(PackageSpec(url="https://github.com/sisl/AutoViz.jl")); Pkg.build("AutoUrban"); Pkg.test("AutoUrban"; coverage=true)'
 after_success:
   - julia --project -e 'using Pkg; cd(Pkg.dir("AutoViz")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
