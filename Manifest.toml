@@ -11,8 +11,8 @@ uuid = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
 version = "0.2.3"
 
 [[AutoViz]]
-deps = ["Cairo", "Colors", "Parameters", "Pkg", "Printf", "Reel", "Reexport", "StaticArrays"]
-git-tree-sha1 = "0b4ead088b08d9fe6584f636a6dac9d07f7e76ec"
+deps = ["AutomotiveDrivingModels", "Cairo", "Colors", "Parameters", "Pkg", "Printf", "Records", "Reel", "Reexport", "StaticArrays", "Vec"]
+git-tree-sha1 = "390eeea5883c3d92f865697ac60a60ef67696a80"
 repo-rev = "master"
 repo-url = "https://github.com/sisl/AutoViz.jl"
 uuid = "82aa6e0c-a491-5edf-8d4b-c16b98e4ea17"
@@ -20,7 +20,7 @@ version = "0.6.2"
 
 [[AutomotiveDrivingModels]]
 deps = ["Distributions", "LinearAlgebra", "Parameters", "Pkg", "Printf", "Records", "Reexport", "Vec"]
-git-tree-sha1 = "391693a08ba1b5d5be866c7d3fb93ce51d1973c2"
+git-tree-sha1 = "5c2f6c9455f2a39568674515418b33baa57bf68d"
 repo-rev = "master"
 repo-url = "https://github.com/sisl/AutomotiveDrivingModels.jl"
 uuid = "99497e54-f3d6-53d3-a3a9-fa9315a7f1ba"
@@ -49,9 +49,9 @@ version = "0.8.10"
 
 [[BinaryProvider]]
 deps = ["Libdl", "Pkg", "SHA", "Test"]
-git-tree-sha1 = "48c147e63431adbcee69bc40b04c3f0fec0a4982"
+git-tree-sha1 = "38be61810f280c3c478f5c38aaf387f8f9199275"
 uuid = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
-version = "0.5.0"
+version = "0.5.1"
 
 [[BufferedStreams]]
 deps = ["Compat", "Pkg", "Test"]
@@ -293,9 +293,9 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[Interpolations]]
 deps = ["AxisAlgorithms", "LinearAlgebra", "OffsetArrays", "Random", "Ratios", "SharedArrays", "SparseArrays", "StaticArrays", "Test", "WoodburyMatrices"]
-git-tree-sha1 = "d8ffeed0c6cb00b70ffcd6dee136dec04cfa0f5c"
+git-tree-sha1 = "d3328be2a9624d62957607a8bdfcc164d24f1b6d"
 uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
-version = "0.10.2"
+version = "0.10.3"
 
 [[IntervalSets]]
 deps = ["Compat"]
@@ -305,9 +305,9 @@ version = "0.3.0"
 
 [[IterTools]]
 deps = ["Pkg", "SparseArrays", "Test"]
-git-tree-sha1 = "ed0787e62dc46b8d8c7c3db54391d71e0da5fefd"
+git-tree-sha1 = "3eb252416e1a5215530420cdd22b46208bb9d4c7"
 uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
-version = "1.0.0"
+version = "1.1.0"
 
 [[JSON]]
 deps = ["Dates", "Distributed", "Mmap", "Pkg", "Sockets", "Test", "Unicode"]
@@ -416,10 +416,10 @@ deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[ProgressMeter]]
-deps = ["Printf", "Random", "Test"]
-git-tree-sha1 = "09e653f4b0a3c44628f0bdd0a0e58bc92e0264ef"
+deps = ["Distributed", "Printf", "Random", "Test"]
+git-tree-sha1 = "5b55c2c974084eab2689ec0d1d5245561b22aeb0"
 uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
-version = "0.6.0"
+version = "0.6.1"
 
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra", "Test"]

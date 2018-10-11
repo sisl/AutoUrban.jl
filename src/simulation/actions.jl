@@ -6,7 +6,7 @@ end
 Base.show(io::IO, a::LatLonAccelDirection) = @printf(io, "LatLonAccelDirection(%6.3f, %6.3f, %d)", a.a_lat, a.a_lon, a.direction)
 Base.length(::Type{LatLonAccelDirection}) = 3
 Base.convert(::Type{LatLonAccelDirection}, v::Vector{Float64}) = LatLonAccel(v[1], v[2],convert(Int,v[3]))
-function Base.copyto!(v::Vector{Float64}, a::LatLonAccel)
+function Base.copyto!(v::Vector{Float64}, a::LatLonAccelDirection)
     v[1] = a.a_lat
     v[2] = a.a_lon
     v[3] = convert(Float64,a.direction)
