@@ -93,7 +93,7 @@ function get_center_of_circle(A::VecSE2, B::VecSE2)
     return VecE2(x,y)
 end
 
-function connect_two_points_by_circle(A::VecSE2, B::VecSE2;s_base::Float64=0.0)
+function connect_two_points_by_circle(A::VecSE2{T}, B::VecSE2{T};s_base::T=zero(T)) where T<:Real
     ncurvepts_per_turn = 25
 
     distance = norm(VecE2(A-B))
@@ -110,7 +110,7 @@ function connect_two_points_by_circle(A::VecSE2, B::VecSE2;s_base::Float64=0.0)
         posangle_a,posangle_b,angle_diff = get_min_difference_angles_neg(atan(CA.y,CA.x),atan(CB.y,CB.x))
     end
 
-    curvepts = Array{CurvePt}(undef, ncurvepts_per_turn)
+    curvepts = Array{CurvePt{T}}(undef, ncurvepts_per_turn)
 
     #@assert abs(angle_diff) > ANG_THD
     if abs(abs(angle_diff)-pi) < ANG_THD
@@ -133,11 +133,11 @@ function connect_two_points_by_circle(A::VecSE2, B::VecSE2;s_base::Float64=0.0)
     return curvepts,total_length
 end
 
-function connect_two_points(A::VecSE2, B::VecSE2)
+function connect_two_points(A::VecSE2{T}, B::VecSE2{T}) where T<:Real
     #connect any two points with one points array
     _,_,abs_diff = get_min_difference_angles(B.θ,A.θ)
 
-    curvepts = Array{CurveP}(undef, 0)
+    curvepts = Array{CurvePt{T}}(undef, 0)
     push!(curvepts,CurvePt(A,  0.0,0.0,0.0))
     if abs_diff < ANG_THD
         push!(curvepts,CurvePt(B,  norm(VecE2(A-B)),0.0,0.0))
@@ -203,11 +203,11 @@ function connect_two_points(A::VecSE2, B::VecSE2)
     return curvepts
 end
 
-function connect_two_points_seperate(A::VecSE2, B::VecSE2)
+function connect_two_points_seperate(A::VecSE2{T}, B::VecSE2{T}) where T<:Real
     #connect any two points with an array of curpve points
     _,_,abs_diff = get_min_difference_angles(B.θ,A.θ)
 
-    curvepts = Array{CurvePt}[]
+    curvepts = Array{CurvePt{T}}[]
     if abs_diff < ANG_THD
         push!(curvepts,[CurvePt(A,  0.0,0.0,0.0)])
         push!(curvepts[1],CurvePt(B,  norm(VecE2(A-B)),0.0,0.0))
