@@ -336,12 +336,12 @@ function connect_two_lane_general!(source::Lane, dest::Lane,roadway::Roadway,lan
     end
 end
 
-function connect_two_seg!(source::RoadSegment,dest::RoadSegment,roadway::Roadway;
+function connect_two_seg!(source::RoadSegment{T},dest::RoadSegment{T},roadway::Roadway{T};
     connections::Array{Tuple{Int,Int}}=Array{Tuple{Int,Int}}(undef, 0),
     boundary_left::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_right::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_middle::LaneBoundary=LaneBoundary(:solid, :white)
-    )
+    ) where T
     if isempty(connections)
         for i=1:length(source.lanes)
             push!(connections,(i,i))
@@ -353,7 +353,7 @@ function connect_two_seg!(source::RoadSegment,dest::RoadSegment,roadway::Roadway
         cindD = CURVEINDEX_START
         A = source.lanes[connections[i][1]].curve[cindS].pos
         B = dest.lanes[connections[i][2]].curve[cindD].pos
-        curveptss = connect_two_points_seperate(A::VecSE2, B::VecSE2)
+        curveptss = connect_two_points_seperate(A, B)
         push!(curveptsss,curveptss)
     end
     segs = []
@@ -361,7 +361,7 @@ function connect_two_seg!(source::RoadSegment,dest::RoadSegment,roadway::Roadway
 
     for i = 1:length(curveptsss[1])
         seg_id += 1
-        seg12 = RoadSegment(seg_id, Array{Lane}(undef, length(connections)))
+        seg12 = RoadSegment{T}(seg_id, Vector{Lane{T}}(undef, length(connections)))
         for j =  1:length(connections)
             tag12 = LaneTag(seg_id,j)
             seg12.lanes[j] = Lane(tag12, curveptsss[j][i], width=source.lanes[connections[j][1]].width,
@@ -393,13 +393,13 @@ function connect_two_seg!(source::RoadSegment,dest::RoadSegment,roadway::Roadway
 
 end
 
-function connect_two_seg_general!(source::RoadSegment,dest::RoadSegment,roadway::Roadway;
+function connect_two_seg_general!(source::RoadSegment{T},dest::RoadSegment{T},roadway::Roadway{T};
     direction::Tuple{Int,Int}=(1,1),
     connections::Array{Tuple{Int,Int}}=Array{Tuple{Int,Int}}(undef, 0),
     boundary_left::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_right::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_middle::LaneBoundary=LaneBoundary(:solid, :white)
-    )
+    ) where T<:Real
     if isempty(connections)
         for i=1:length(source.lanes)
             push!(connections,(i,i))
@@ -426,7 +426,7 @@ function connect_two_seg_general!(source::RoadSegment,dest::RoadSegment,roadway:
             B = VecSE2(B.x,B.y,mod2pi(B.θ+pi))
         end
         print(B)
-        curveptss = connect_two_points_seperate(A::VecSE2, B::VecSE2)
+        curveptss = connect_two_points_seperate(A, B)
         push!(curveptsss,curveptss)
     end
     segs = []
@@ -434,7 +434,7 @@ function connect_two_seg_general!(source::RoadSegment,dest::RoadSegment,roadway:
 
     for i = 1:length(curveptsss[1])
         seg_id += 1
-        seg12 = RoadSegment(seg_id, Array{Lane}(undef, length(connections)))
+        seg12 = RoadSegment{T}(seg_id, Array{Lane{T}}(undef, length(connections)))
         for j =  1:length(connections)
             tag12 = LaneTag(seg_id,j)
             seg12.lanes[j] = Lane(tag12, curveptsss[j][i], width=source.lanes[connections[j][1]].width,
@@ -508,11 +508,11 @@ function connect_general!(source::Lane, dest::Lane,direction::Tuple{Int,Int}=(1,
     end
 end
 
-function add_connection!(connection::Connection,roadway::Roadway;
+function add_connection!(connection::Connection,roadway::Roadway{T};
     boundary_left::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_right::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_middle::LaneBoundary=LaneBoundary(:solid, :white)
-    )
+    ) where T
     source = roadway.segments[connection.source]
     dest = roadway.segments[connection.dest]
     if isempty(connection.laneConnections)
@@ -534,7 +534,7 @@ function add_connection!(connection::Connection,roadway::Roadway;
 
     for i = 1:length(curveptsss[1])
         seg_id += 1
-        seg12 = RoadSegment(seg_id, Array{Lane}(undef, length(connection.laneConnections)))
+        seg12 = RoadSegment{T}(seg_id, Vector{Lane{T}}(undef, length(connection.laneConnections)))
         if i==1
             connection.path = seg_id
         end
@@ -578,15 +578,15 @@ end
 function gen_connected_lanes(;nlanes::Int=1,roadlength::Float64=5.0,
     lane_width::Float64=DEFAULT_LANE_WIDTH, # [m]
     lane_widths::Vector{Float64} = fill(lane_width, nlanes),
-    origin1::VecSE2 = VecSE2(0.0,0.0,0.0),
-    origin2::VecSE2 = VecSE2(origin1.x+roadlength,origin1.y-roadlength,1.25*pi),
+    origin1::VecSE2{T} = VecSE2(0.0,0.0,0.0),
+    origin2::VecSE2{T} = VecSE2(origin1.x+roadlength,origin1.y-roadlength,1.25*pi),
     boundary_leftmost::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_rightmost::LaneBoundary=LaneBoundary(:solid, :white),
     boundary_middle::LaneBoundary=LaneBoundary(:broken, :white)
-    )
+    ) where T<:Real
 
 
-    segments = RoadSegment[]
+    segments = RoadSegment{T}[]
     seg1 = gen_straight_segment(1, nlanes, roadlength,
                                                 origin=origin1, lane_widths=lane_widths,
                                                 boundary_leftmost=boundary_leftmost,
@@ -598,7 +598,7 @@ function gen_connected_lanes(;nlanes::Int=1,roadlength::Float64=5.0,
                                                 boundary_rightmost=boundary_rightmost,
                                                 boundary_middle=boundary_middle)
 
-    retval = Roadway()
+    retval = Roadway{T}()
     push!(retval.segments, seg1)
     push!(retval.segments, seg2)
 
