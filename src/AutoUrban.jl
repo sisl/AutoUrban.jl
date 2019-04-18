@@ -7,6 +7,7 @@ using AutoViz
 using EzXML
 using Printf
 using LinearAlgebra
+using Distributions
 
 include("simulation/main.jl")
 include("drivermodels/main.jl")
