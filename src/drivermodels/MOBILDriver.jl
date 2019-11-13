@@ -1,6 +1,6 @@
 import AutomotiveDrivingModels.observe!
 
-mutable struct MOBILDriver <: LaneChangeModel
+mutable struct MOBILDriver <: LaneChangeModel{LaneChangeChoice}
 
     dir::Int
     #rec::SceneRecord
