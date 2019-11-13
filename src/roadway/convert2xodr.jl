@@ -165,27 +165,27 @@ function handle_junction!(r,id,junction,roadway)
             laneLink["from"] = convert_JuliaLaneId2VTDLaneId(LaneTag(connection.source,connection.laneConnections[i][1]),roadway) 
             laneLink["to"] = convert_JuliaLaneId2VTDLaneId(LaneTag(connection.path,i),roadway)
         end
-        for road in findall(r,"road")
+        for road in findall("road", r)
             if parse(Int,road["id"]) == connection.source
-                for successor in findall(road,"link/successor")
+                for successor in findall("link/successor", road)
                     successor["elementType"] = "junction"
                     successor["elementId"] = junctionId
                     delete!(successor, "contactPoint")
                 end
-                for successor in findall(road,"lanes/laneSection/right/lane/link/successor")
+                for successor in findall("lanes/laneSection/right/lane/link/successor", road)
                     unlink!(successor)
                 end
             end
             if parse(Int,road["id"]) == connection.path
                 road["junction"] = junctionId
-                for roadi in findall(r,"road")
+                for roadi in findall("road", r)
                     if parse(Int,roadi["id"]) == roadway.segments[connection.path].lanes[1].exits[1].target.tag.segment
-                        for predecessor in findall(roadi,"link/predecessor")
+                        for predecessor in findall("link/predecessor", roadi)
                             predecessor["elementType"] = "junction"
                             predecessor["elementId"] = junctionId
                             delete!(predecessor, "contactPoint")
                         end
-                        for predecessor in findall(roadi,"lanes/laneSection/right/lane/link/predecessor")
+                        for predecessor in findall("lanes/laneSection/right/lane/link/predecessor", roadi)
                             unlink!(predecessor)
                         end  
                     end     

@@ -6,6 +6,15 @@ A Julia package expanding the [AutomotiveDrivingModels.jl](https://github.com/si
 
 ## Installation
 
+Preferred way, by adding the SISL registry: 
+
+```
+] registry add https://github.com/sisl/Registry
+] add AutoUrban
+```
+
+Other way, by manually adding all the dependencies:
+
 ```julia 
 using Pkg
 Pkg.add(PackageSpec(url="https://github.com/sisl/Vec.jl"))
