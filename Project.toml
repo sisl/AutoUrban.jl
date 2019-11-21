@@ -1,7 +1,7 @@
 name = "AutoUrban"
 uuid = "1385418a-9289-5a49-ab93-843b508de4cb"
 repo = "https://github.com/sisl/AutoUrban.jl"
-version = "0.2.3"
+version = "0.2.4"
 
 [deps]
 AutoViz = "82aa6e0c-a491-5edf-8d4b-c16b98e4ea17"
