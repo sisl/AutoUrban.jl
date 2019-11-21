@@ -8,6 +8,7 @@ using EzXML
 using Printf
 using LinearAlgebra
 using Distributions
+import Cairo
 
 export
 	LatLonAccelDirection,

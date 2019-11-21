@@ -39,7 +39,7 @@ function render_trafficlights!(rendermodel::RenderModel,trafficlights::Vector{Tr
     rendermodel
 end
 =#
-function render(ctx::CairoContext, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,models::Dict{Int, DriverModel};
+function render(ctx::Cairo.CairoContext, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,models::Dict{Int, DriverModel};
     text::Vector{String}=["Nothing"],
     #trafficlights::Vector{TrafficLight}=TrafficLight[],
     rendermodel::RenderModel=RenderModel(),
