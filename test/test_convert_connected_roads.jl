@@ -23,29 +23,18 @@ function  create_test_roadway()
     return two_road_connect
 end
 
-@testset "Convert XODR" begin
-    two_road_connect = create_test_roadway()
-
-    # Convert the roadway to xodr file
-    xodr, root = initialize_XML()
-    convert_roadway!(root, two_road_connect)
-
-    ## Actually test conversion
-    roads = findall("road", root)
-    @test length(roads) == 3
-
-    ### Verify first road
-    road = roads[1]
+function test_road_segment_1(road)
     @test road["name"] == ""
     @test road["id"] == "1"
     @test parse(Float64, road["length"]) == 50.0
     @test road["junction"] == "-1"
 
-    #### Verify the road has the correct children
+    # Verify the road type
     road_type = findfirst("type", road)
     @test parse(Float64, road_type["s"]) == 0.0
     @test road_type["type"] == "rural"
 
+    # Verify the road link
     road_link = findfirst("link", road)
     predessor = findfirst("predecessor", road_link)
     @test isnothing(predessor)
@@ -54,6 +43,7 @@ end
     @test successor["elementId"] == "3"
     @test successor["contactPoint"] == "start"
 
+    # Verify the road planView and geometry
     road_plan_view = findfirst("planView", road)
     @test road_plan_view.type == EzXML.ELEMENT_NODE
     geometry = findfirst("geometry", road_plan_view)
@@ -64,10 +54,11 @@ end
     @test parse(Float64, geometry["length"]) == 50.0
     @test findfirst("line", geometry).name == "line"
 
-    ##### Verify lanes
+    # Verify lanes
     road_lane = findfirst("lanes", road)
     @test road_lane.name == "lanes"
 
+    # Verify lane offset
     lane_offset = findfirst("laneOffset", road_lane)
     @test parse(Float64, lane_offset["s"]) == 0.0
     @test parse(Float64, lane_offset["a"]) == 7.5
@@ -75,12 +66,15 @@ end
     @test parse(Float64, lane_offset["c"]) == 0.0
     @test parse(Float64, lane_offset["d"]) == 0.0
 
+    # Verify lane section
     lane_section = findfirst("laneSection", road_lane)
     @test parse(Float64, lane_section["s"]) == 0.0
 
+    # Verify left lane section
     left = findfirst("left", lane_section)
     @test left.name == "left"
 
+    # Verify center lane section
     center = findfirst("center", lane_section)
     @test center.name == "center"
     lane = findfirst("lane", center)
@@ -91,10 +85,12 @@ end
     @test road_mark["type"] == "solid"
     @test road_mark["color"] == "standard"
 
+    # Verify right lane section
     right = findfirst("right", lane_section)
     @test right.name == "right"
     lanes = findall("lane", right)
 
+    # Verify frist lane in right lane section
     lane = lanes[1]
     @test lane["id"] == "-1"
     @test lane["type"] == "driving"
@@ -114,6 +110,7 @@ end
     successor = findfirst("successor", link)
     @test successor["id"] == "-1"
 
+    # Verify second lane in right lane section
     lane = lanes[2]
     @test lane["id"] == "-2"
     @test lane["type"] == "driving"
@@ -133,6 +130,7 @@ end
     successor = findfirst("successor", link)
     @test successor["id"] == "-2"
 
+    # Verify third lane in right lane section
     lane = lanes[3]
     @test lane["id"] == "-3"
     @test lane["type"] == "driving"
@@ -151,4 +149,20 @@ end
     @test isnothing(predessor)
     successor = findfirst("successor", link)
     @test successor["id"] == "-3"
+end
+
+@testset "Convert Connected Roads to OpenDrive" begin
+    two_road_connect = create_test_roadway()
+
+    # Convert the roadway to xodr file
+    xodr, root = initialize_XML()
+    convert_roadway!(root, two_road_connect)
+
+    # Verify the root node's road children
+    roads = findall("road", root)
+    @test length(roads) == 3
+
+    # Verify first road
+    road = roads[1]
+    test_road_segment_1(road)
 end
