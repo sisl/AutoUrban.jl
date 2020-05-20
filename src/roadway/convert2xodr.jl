@@ -20,11 +20,13 @@ function initialize_XML()
     header["revMinor"]=4
     header["name"]=""
     header["version"]="1.00"
-    header["data"]= "Tue Mar 21 15:00:43 2017"
-    header["north"]=0
-    header["south"]=0
-    header["east"]=0
-    header["west"]=0
+    header["date"]= Dates.format(Dates.now(), "e u dd HH:MM:SS yyyy")
+    header["north"]=0.0
+    header["south"]=0.0
+    header["east"]=0.0
+    header["west"]=0.0
+    geo_ref = addelement!(header, "geoReference")
+    link!(geo_ref, CDataNode("+lat_0=0.0 +lon_0=0.0"))
     return doc,r
 end
 
