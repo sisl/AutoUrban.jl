@@ -1,14 +1,14 @@
-function  create_test_roadway()
+function create_test_roadway()
     # Initialize roadway for test
     two_road_connect = Roadway()
     
     # Create two individual roads
-    origin = VecSE2(0.0,0.0,0.0)
+    origin = VecSE2(0.0, 0.0, 0.0)
     lane_length = 50.0
     num_lanes = 3
     add_line!(origin, num_lanes, lane_length, two_road_connect)
     
-    origin = VecSE2(70.0,2.0,0.0)
+    origin = VecSE2(70.0, 2.0, 0.0)
     lane_length = 50.0
     num_lanes = 3
     add_line!(origin, num_lanes, lane_length, two_road_connect)
