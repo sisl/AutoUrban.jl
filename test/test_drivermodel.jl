@@ -2,7 +2,7 @@ let
     roadlength = 50.0
     lane_width = 5.0
     roadway,junction = gen_intersection(roadlength = roadlength,lane_width = lane_width)
-    scene = Frame(Entity{VehicleState, BicycleModel, Int},100)
+    scene = Scene(Entity{VehicleState, BicycleModel, Int},100)
     id=1
     push!(scene,Entity(VehicleState(VecSE2(0.0,0.0,0.0), roadway, 10.0), 
         BicycleModel(VehicleDef(AgentClass.CAR, 4.826, 1.81)),id))

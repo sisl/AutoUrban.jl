@@ -22,14 +22,12 @@ mutable struct MultiPtsTurningDriver <: MultiPtsDriver
     MultiPtsTurningDriver(Δt::Float64; siji::AccSteerDriver=AccSteerDriver(0.0,0.0),N::Int=20,Pts::Matrix{Float64}=zeros(2,20),steermax::Float64=pi/4,steerdotmax::Float64=20.0,accmax::Float64=10.0,commands::Array{Float64}=zeros(4),index::Int=0,subindex::Int=0,laneNum_desire::Int=1,acc_desire::Float64=0.0,v_desire::Float64=0.0,v_max::Float64=20.0,v_min::Float64=0.0,turning_direction::Int=1,color::Colorant=RGB(1, 0, 0))=new(Δt,siji,N,Pts,steermax,steerdotmax,accmax,commands,index,subindex,laneNum_desire,acc_desire,v_desire,v_max,v_min,turning_direction,color)
 end
 
-AutomotiveDrivingModels.get_name(model::MultiPtsTurningDriver) = "MultiPtsTurningDriver"
-
 Base.rand(model::MultiPtsTurningDriver) = rand(model.siji)
 Distributions.pdf(model::MultiPtsTurningDriver, a::Float64) = a == model.siji.acc ? Inf : 0.0
 Distributions.logpdf(model::MultiPtsTurningDriver, a::Float64) = a == model.siji.acc ? Inf : -Inf
 
 
-function excute_action!(model::MultiPtsTurningDriver,acc::Float64,direction::Int,scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
+function excute_action!(model::MultiPtsTurningDriver,acc::Float64,direction::Int,scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
     veh=scene[ego_index]
     laneNum=veh.state.posF.roadind.tag.lane
     model.acc_desire=acc
@@ -46,13 +44,13 @@ function set_pts!(model::MultiPtsTurningDriver,PtsIn::Matrix{Float64})
     model
 end
 
-function AutomotiveDrivingModels.observe!(model::MultiPtsTurningDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
+function AutomotiveDrivingModels.observe!(model::MultiPtsTurningDriver, scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
     ego_index = findfirst(scene, egoid)
     get_acc_steer!(model,scene,roadway,ego_index)
     model
 end
 
-function get_acc_steer!(model::MultiPtsTurningDriver,scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
+function get_acc_steer!(model::MultiPtsTurningDriver,scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
     if model.index==6 || model.index>model.N
     #if model.index>model.N
         #println("index reach ", model.index)

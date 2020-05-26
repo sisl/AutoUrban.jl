@@ -97,31 +97,6 @@ function AutomotiveDrivingModels.propagate(
     end
 end
 
-function Base.get(
-    ::Type{LatLonAccelDirection},
-    rec::SceneRecord,
-    roadway::Roadway,
-    vehicle_index::Int,
-    pastframe::Int = 0
-)
-    accel_lat = get(ACCFT, rec, roadway, vehicle_index, pastframe)
-    accel_lon = get(ACCFS, rec, roadway, vehicle_index, pastframe)
-    LatLonAccelDirection(accel_lat, accel_lon, 1)
-end
-
-function pull_action!(
-    ::Type{LatLonAccelDirection},
-    a::Vector{Float64},
-    rec::SceneRecord,
-    roadway::Roadway,
-    vehicle_index::Int,
-    pastframe::Int = 0
-)
-    a[1] = get(ACCFT, rec, roadway, vehicle_index, pastframe)
-    a[2] = get(ACCFS, rec, roadway, vehicle_index, pastframe)
-    a
-end
-
 mutable struct AccelSteeringDirection
     a::Float64 # accel [m/s²]
     δ::Float64 # steering angle [rad]
@@ -186,7 +161,6 @@ function AutomotiveDrivingModels.propagate(
         posG = VecSE2(x′, y′, θ′)
     end
 
-    # VehicleState(posG, roadway, v′)
     state = VehicleState(posG, roadway, v′)
     projections = in_lanes(posG, roadway)
     if length(roadway[previousInd.tag].exits) > 0

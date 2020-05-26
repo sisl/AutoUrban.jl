@@ -1,7 +1,6 @@
 import AutomotiveDrivingModels.observe!
 
 mutable struct MOBILDriver <: LaneChangeModel{LaneChangeChoice}
-
     dir::Int
     #rec::SceneRecord
     mlon::LaneFollowingDriver
@@ -31,20 +30,21 @@ mutable struct MOBILDriver <: LaneChangeModel{LaneChangeChoice}
         retval
     end
 end
-get_name(::MOBILDriver) = "MOBILDriver"
+
 function set_desired_speed!(model::MOBILDriver, v_des::Float64)
     set_desired_speed!(model.mlon, v_des)
     model
 end
+
 function AutomotiveDrivingModels.observe!(model::MOBILDriver, scene::Scene, roadway::Roadway, egoid::Int)
     observe_helper!(model,scene,roadway,egoid)
 end
-function AutomotiveDrivingModels.observe!(model::MOBILDriver, scene::Frame{Entity{VehicleState, BicycleModel, Int}}, roadway::Roadway, egoid::Int)
+
+function AutomotiveDrivingModels.observe!(model::MOBILDriver, scene::Scene{Entity{VehicleState, BicycleModel, Int}}, roadway::Roadway, egoid::Int)
     observe_helper!(model,scene,roadway,egoid)
 end
 
-
-function observe_helper!(model::MOBILDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
+function observe_helper!(model::MOBILDriver, scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
     #rec = model.rec
     #update!(rec, scene)
 
@@ -99,7 +99,6 @@ function observe_helper!(model::MOBILDriver, scene::Union{Scene,Frame{Entity{Veh
         end
 
         if passes_safety_criterion
-
             Δaccel_o = 0.0
             if rear_M.ind != 0
                 id = scene[rear_M.ind].id
@@ -156,8 +155,6 @@ function observe_helper!(model::MOBILDriver, scene::Union{Scene,Frame{Entity{Veh
         end
 
         if passes_safety_criterion
-
-
             Δaccel_o = 0.0
             if rear_M.ind != 0
                 id = scene[rear_M.ind].id

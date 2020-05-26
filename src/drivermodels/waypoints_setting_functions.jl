@@ -1,4 +1,4 @@
-function set_lane_changing_pts!(model::MultiPtsDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
+function set_lane_changing_pts!(model::MultiPtsDriver, scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
     # direction is like -1: turn to right lane, 1: turn to left lane
     #println("enter function")
             
@@ -307,7 +307,7 @@ end
 
 #########
 
-function set_lane_changing_pts_with_direction!(model::MultiPtsDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int, turning_direction::Int = 1)
+function set_lane_changing_pts_with_direction!(model::MultiPtsDriver, scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int, turning_direction::Int = 1)
     
     veh = scene[ego_index]    
     x = veh.state.posG.x

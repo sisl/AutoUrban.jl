@@ -2,7 +2,7 @@ export get_commands!
 
 #####under developing
 
-function get_commands!(model::MultiPtsDriver,scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,ego_index::Int)
+function get_commands!(model::MultiPtsDriver,scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,ego_index::Int)
     veh = scene[ego_index]
     x = veh.state.posG.x
     y = veh.state.posG.y

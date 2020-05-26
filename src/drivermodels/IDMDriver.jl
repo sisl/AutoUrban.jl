@@ -43,13 +43,13 @@ mutable struct IDMDriver <: LaneFollowingDriver
         retval
     end
 end
-get_name(::IDMDriver) = "IDM"
+
 function set_desired_speed!(model::IDMDriver, v_des::Float64)
     model.v_des = v_des
     model
 end
 
-function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Frame{Entity{VehicleState, BicycleModel, Int}}, roadway::Roadway, egoid::Int)
+function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Scene{Entity{VehicleState, BicycleModel, Int}}, roadway::Roadway, egoid::Int)
     vehicle_index = findfirst(scene, egoid)
 
     fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront(),max_distance_fore=model.max_horizon)
@@ -125,6 +125,7 @@ function Base.rand(model::IDMDriver)
         LaneFollowingAccel(rand(Normal(model.a, model.σ)))
     end
 end
+
 function Distributions.pdf(model::IDMDriver, a::LaneFollowingAccel)
     if isnan(model.σ) || model.σ ≤ 0.0
         Inf
@@ -132,6 +133,7 @@ function Distributions.pdf(model::IDMDriver, a::LaneFollowingAccel)
         pdf(Normal(model.a, model.σ), a.a)
     end
 end
+
 function Distributions.logpdf(model::IDMDriver, a::LaneFollowingAccel)
     if isnan(model.σ) || model.σ ≤ 0.0
         Inf
