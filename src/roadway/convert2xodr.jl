@@ -57,13 +57,21 @@ function convert_lane!(laneTag, right, roadway)
     width["d"] = 0.0
     roadMark = add_road_mark!(lane)
     link = addelement!(lane, "link", "")
+
     if !isempty(laneJulia.entrances)
-        prevId = convert_JuliaLaneId2VTDLaneId(laneJulia.entrances[1].target.tag, roadway)
+        prevId = convert_JuliaLaneId2VTDLaneId(
+            laneJulia.entrances[1].target.tag,
+            roadway
+        )
         predecessor = addelement!(link, "predecessor")
         predecessor["id"] = prevId
     end
+
     if !isempty(laneJulia.exits)
-        nextId = convert_JuliaLaneId2VTDLaneId(laneJulia.exits[1].target.tag, roadway)
+        nextId = convert_JuliaLaneId2VTDLaneId(
+            laneJulia.exits[1].target.tag,
+            roadway
+        )
         successor = addelement!(link, "successor")
         successor["id"] = nextId
     end
@@ -111,6 +119,7 @@ function convert_seg!(seg, r, roadway)
     geometry["y"] = lane.curve[1].pos.y
     geometry["hdg"] = mod2pi(lane.curve[1].pos.θ)
     geometry["length"] = s
+
     if lane.curve[1].k == 0 || isnan(lane.curve[1].k)
         line = addelement!(geometry, "line")
     else
@@ -122,9 +131,11 @@ function convert_seg!(seg, r, roadway)
     lanes = addelement!(road, "lanes")
     laneOffset = addelement!(lanes, "laneOffset")
     a = 0.0
+
     for i = 1:length(seg.lanes)
         a += seg.lanes[i].width
     end
+
     a -= seg.lanes[1].width / 2
     laneOffset["s"] = 0.0
     laneOffset["a"] = a
@@ -143,7 +154,7 @@ function convert_seg!(seg, r, roadway)
     lane["level"] = "false"
     add_road_mark!(lane, "solid")
     
-    for lane in seg.lanes
+    for lane in Iterators.reverse(seg.lanes)
         convert_lane!(lane.tag, right, roadway)
     end  
 end
