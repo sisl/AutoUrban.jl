@@ -3,9 +3,7 @@ import AutomotiveDrivingModels.observe!
 mutable struct IDMDriver <: LaneFollowingDriver
     a::Float64 # predicted acceleration
     σ::Float64 # optional stdev on top of the model, set to zero or NaN for deterministic behavior
-
     k_spd::Float64 # proportional constant for speed tracking when in freeflow [s⁻¹]
-
     δ::Float64 # acceleration exponent [-]
     T::Float64 # desired time headway [s]
     v_des::Float64 # desired speed [m/s]
@@ -26,8 +24,7 @@ mutable struct IDMDriver <: LaneFollowingDriver
         d_cmf::Float64 =   2.0,
         d_max::Float64 =   9.0,
         max_horizon::Float64 = 35.0,
-        )
-
+    )
         retval = new()
         retval.a     = NaN
         retval.σ     = σ
@@ -49,10 +46,23 @@ function set_desired_speed!(model::IDMDriver, v_des::Float64)
     model
 end
 
-function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Scene{Entity{VehicleState, BicycleModel, Int}}, roadway::Roadway, egoid::Int)
+function AutomotiveDrivingModels.observe!(
+    model::IDMDriver,
+    scene::Scene{Entity{VehicleState, BicycleModel, Int}},
+    roadway::Roadway,
+    egoid::Int
+)
     vehicle_index = findfirst(scene, egoid)
 
-    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront(),max_distance_fore=model.max_horizon)
+    fore = get_neighbor_fore_along_lane(
+        scene,
+        vehicle_index,
+        roadway,
+        VehicleTargetPointFront(),
+        VehicleTargetPointRear(),
+        VehicleTargetPointFront(),
+        max_distance_fore=model.max_horizon
+    )
 
     v_ego = scene[vehicle_index].state.v
     v_oth = NaN
@@ -68,10 +78,23 @@ function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Scene{Entity{
     return model
 end
 
-function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Scene, roadway::Roadway, egoid::Int)
+function AutomotiveDrivingModels.observe!(
+    model::IDMDriver,
+    scene::Scene,
+    roadway::Roadway,
+    egoid::Int
+)
     vehicle_index = findfirst(scene, egoid)
 
-    fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront(),max_distance_fore=model.max_horizon)
+    fore = get_neighbor_fore_along_lane(
+        scene,
+        vehicle_index,
+        roadway,
+        VehicleTargetPointFront(),
+        VehicleTargetPointRear(),
+        VehicleTargetPointFront(),
+        max_distance_fore=model.max_horizon
+    )
 
     v_ego = scene[vehicle_index].state.v
     v_oth = NaN
@@ -87,8 +110,12 @@ function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Scene, roadwa
     return model
 end
 
-function track_longitudinal!(model::IDMDriver, v_ego::Float64, v_oth::Float64, headway::Float64)
-
+function track_longitudinal!(
+    model::IDMDriver,
+    v_ego::Float64,
+    v_oth::Float64,
+    headway::Float64
+)
     if !isnan(v_oth)
         #@assert !isnan(headway) && headway > 0
         if headway > 0.0
