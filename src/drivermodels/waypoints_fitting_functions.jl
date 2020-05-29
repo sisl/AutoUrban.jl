@@ -7,7 +7,7 @@ export
 
 curveModel(x, p) = p[1]*x.^3+p[2]*x.^2+p[3]*x+p[4]
 
-function fit_lane(model::MultiPtsDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
+function fit_lane(model::MultiPtsDriver, scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
     sampleDistance=25.0;
     sampleInterval=1.0;
     #model(x, p) = p[1]*x^3+p[2]*x^2+p[3]*x+p[4]
@@ -103,7 +103,7 @@ function get_curvePt_vec_per(fit::LsqFit.LsqFitResult,x::Float64,y::Float64,turn
     return curvePtVecPer
 end
 
-function set_lane_changing_pts!(model::MultiPtsDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
+function set_lane_changing_pts!(model::MultiPtsDriver, scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, ego_index::Int)
     #println("enter function")
     #laneFunction=fitLane(model, scene, roadway, ego_index)
     veh = scene[ego_index]    

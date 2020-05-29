@@ -39,7 +39,7 @@ function render_trafficlights!(rendermodel::RenderModel,trafficlights::Vector{Tr
     rendermodel
 end
 =#
-function render(ctx::Cairo.CairoContext, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,models::Dict{Int, DriverModel};
+function render(ctx::Cairo.CairoContext, scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,models::Dict{Int, DriverModel};
     text::Vector{String}=["Nothing"],
     #trafficlights::Vector{TrafficLight}=TrafficLight[],
     rendermodel::RenderModel=RenderModel(),
@@ -57,7 +57,7 @@ function render(ctx::Cairo.CairoContext, scene::Union{Scene,Frame{Entity{Vehicle
     for (i,veh) in enumerate(scene)
         if haskey(models,veh.id)
             model = models[veh.id]
-            name = AutomotiveDrivingModels.get_name(model)
+            name = nothing # This was deprecated and removed, but never replaced AutomotiveDrivingModels.get_name(model)
             if  name == "MultiPtsTurningDriver"
                 render_multipoint_drivers!(rendermodel,model,veh.id,car_colors)
             end
@@ -80,7 +80,7 @@ function render(ctx::Cairo.CairoContext, scene::Union{Scene,Frame{Entity{Vehicle
     ctx
 end
 
-function render(scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,models::Dict{Int, DriverModel};
+function render(scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway,models::Dict{Int, DriverModel};
     text::Vector{String}=["Nothing"],
     #trafficlights::Vector{TrafficLight}=TrafficLight[],
     canvas_width::Int=DEFAULT_CANVAS_WIDTH,

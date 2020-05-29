@@ -1,7 +1,6 @@
 export UrbanDriver
 
 mutable struct UrbanDriver <: DriverModel{LatLonAccelDirection}
-    rec::SceneRecord
     mlon::LaneFollowingDriver
     mlat::LateralDriverModel
     mlane::LaneChangeModel
@@ -13,7 +12,6 @@ mutable struct UrbanDriver <: DriverModel{LatLonAccelDirection}
     
     function UrbanDriver(
         timestep::Float64;
-        rec::SceneRecord = SceneRecord(1, timestep),
         mlon::LaneFollowingDriver=IDMDriver(),
         mlat::LateralDriverModel=ProportionalLaneTracker(),
         mlane::LaneChangeModel=MOBIL(timestep,mlon=IDMDriver()),
@@ -25,7 +23,6 @@ mutable struct UrbanDriver <: DriverModel{LatLonAccelDirection}
         )
 
         retval = new()
-        retval.rec = rec
         retval.mlon = mlon
         retval.mlat = mlat
         retval.mlane = mlane
@@ -37,7 +34,6 @@ mutable struct UrbanDriver <: DriverModel{LatLonAccelDirection}
         retval
     end
 end
-AutomotiveDrivingModels.get_name(::UrbanDriver) = "UrbanDriver"
 
 function set_desired_speed!(model::UrbanDriver, v_des::Float64)
     AutomotiveDrivingModels.set_desired_speed!(model.mlon, v_des)
@@ -45,7 +41,7 @@ function set_desired_speed!(model::UrbanDriver, v_des::Float64)
     model
 end
 
-function track_longitudinal!(driver::LaneFollowingDriver, scene::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, vehicle_index::Int, fore::NeighborLongitudinalResult)
+function track_longitudinal!(driver::LaneFollowingDriver, scene::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, vehicle_index::Int, fore::NeighborLongitudinalResult)
     v_ego = scene[vehicle_index].state.v
     if fore.ind != 0
         headway, v_oth = fore.Δs, scene[fore.ind].state.v
@@ -55,7 +51,7 @@ function track_longitudinal!(driver::LaneFollowingDriver, scene::Union{Scene,Fra
     return track_longitudinal!(driver, v_ego, v_oth, headway)
 end
 
-function AutomotiveDrivingModels.observe!(driver::UrbanDriver, scene2::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
+function AutomotiveDrivingModels.observe!(driver::UrbanDriver, scene2::Union{Scene,Scene{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
     scene = Scene()
     for veh in scene2
         push!(scene,Vehicle(veh.state,veh.def.def,veh.id))
