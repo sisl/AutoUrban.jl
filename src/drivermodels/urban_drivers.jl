@@ -37,11 +37,10 @@ mutable struct UrbanDriver <: DriverModel{LatLonAccelDirection}
         retval
     end
 end
-AutomotiveDrivingModels.get_name(::UrbanDriver) = "UrbanDriver"
 
 function set_desired_speed!(model::UrbanDriver, v_des::Float64)
-    AutomotiveDrivingModels.set_desired_speed!(model.mlon, v_des)
-    AutomotiveDrivingModels.set_desired_speed!(model.mlane, v_des)
+    AutomotiveSimulator.set_desired_speed!(model.mlon, v_des)
+    AutomotiveSimulator.set_desired_speed!(model.mlane, v_des)
     model
 end
 
@@ -55,12 +54,12 @@ function track_longitudinal!(driver::LaneFollowingDriver, scene::Union{Scene,Fra
     return track_longitudinal!(driver, v_ego, v_oth, headway)
 end
 
-function AutomotiveDrivingModels.observe!(driver::UrbanDriver, scene2::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
+function AutomotiveSimulator.observe!(driver::UrbanDriver, scene2::Union{Scene,Frame{Entity{VehicleState, BicycleModel, Int}}}, roadway::Roadway, egoid::Int)
     scene = Scene()
     for veh in scene2
         push!(scene,Vehicle(veh.state,veh.def.def,veh.id))
     end
-    AutomotiveDrivingModels.update!(driver.rec, scene)
+    AutomotiveSimulator.update!(driver.rec, scene)
     observe!(driver.mlane, scene, roadway, egoid)
     lane_change_action = rand(driver.mlane)
    
@@ -82,8 +81,8 @@ function AutomotiveDrivingModels.observe!(driver::UrbanDriver, scene2::Union{Sce
     end
 
     
-    AutomotiveDrivingModels.track_lateral!(driver.mlat, laneoffset, lateral_speed)
-    #AutomotiveDrivingModels.track_longitudinal!(driver.mlon, scene, roadway, vehicle_index, fore.ind)
+    AutomotiveSimulator.track_lateral!(driver.mlat, laneoffset, lateral_speed)
+    #AutomotiveSimulator.track_longitudinal!(driver.mlon, scene, roadway, vehicle_index, fore.ind)
     roadind = scene[vehicle_index].state.posF.roadind
     max_k,distance = get_max_curvature(roadind, roadway, 25.0,direction = driver.direction)
     #println(max_k,distance)

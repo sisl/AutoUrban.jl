@@ -1,4 +1,4 @@
-import AutomotiveDrivingModels.observe!
+import AutomotiveSimulator.observe!
 
 mutable struct IDMDriver <: LaneFollowingDriver
     a::Float64 # predicted acceleration
@@ -43,13 +43,13 @@ mutable struct IDMDriver <: LaneFollowingDriver
         retval
     end
 end
-get_name(::IDMDriver) = "IDM"
+
 function set_desired_speed!(model::IDMDriver, v_des::Float64)
     model.v_des = v_des
     model
 end
 
-function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Frame{Entity{VehicleState, BicycleModel, Int}}, roadway::Roadway, egoid::Int)
+function AutomotiveSimulator.observe!(model::IDMDriver, scene::Frame{Entity{VehicleState, BicycleModel, Int}}, roadway::Roadway, egoid::Int)
     vehicle_index = findfirst(scene, egoid)
 
     fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront(),max_distance_fore=model.max_horizon)
@@ -68,7 +68,7 @@ function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Frame{Entity{
     return model
 end
 
-function AutomotiveDrivingModels.observe!(model::IDMDriver, scene::Scene, roadway::Roadway, egoid::Int)
+function AutomotiveSimulator.observe!(model::IDMDriver, scene::Scene, roadway::Roadway, egoid::Int)
     vehicle_index = findfirst(scene, egoid)
 
     fore = get_neighbor_fore_along_lane(scene, vehicle_index, roadway, VehicleTargetPointFront(), VehicleTargetPointRear(), VehicleTargetPointFront(),max_distance_fore=model.max_horizon)

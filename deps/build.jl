@@ -6,10 +6,10 @@ end
 if !in("Records", packages)
     Pkg.add(PackageSpec(url="https://github.com/sisl/Records.jl.git"))
 end
-if !in("AutomotiveDrivingModels", packages)
-    Pkg.add(PackageSpec(url="https://github.com/sisl/AutomotiveDrivingModels.jl.git"))
+if !in("AutomotiveSimulator", packages)
+    Pkg.add(PackageSpec(url="https://github.com/sisl/AutomotiveSimulator.jl.git"))
 end
-if !in("AutoViz", packages)
-    Pkg.add(PackageSpec(url="https://github.com/sisl/AutoViz.jl.git"))
+if !in("AutomotiveVisualization", packages)
+    Pkg.add(PackageSpec(url="https://github.com/sisl/AutomotiveVisualization.jl.git"))
 end
 
