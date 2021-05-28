@@ -12,7 +12,7 @@ function Base.copyto!(v::Vector{Float64}, a::LatLonAccelDirection)
     v[3] = convert(Float64,a.direction)
     v
 end
-function AutomotiveDrivingModels.propagate(veh::Entity{VehicleState, D, Int}, action::LatLonAccelDirection,  roadway::Roadway, Δt::Float64) where {D<:Union{VehicleDef, BicycleModel}}
+function AutomotiveSimulator.propagate(veh::Entity{VehicleState, D, Int}, action::LatLonAccelDirection,  roadway::Roadway, Δt::Float64) where {D<:Union{VehicleDef, BicycleModel}}
     previousInd = veh.state.posF.roadind
     a_lat = action.a_lat
     a_lon = action.a_lon
@@ -69,6 +69,16 @@ function AutomotiveDrivingModels.propagate(veh::Entity{VehicleState, D, Int}, ac
     end
 end
 
+"""
+    SceneRecord
+A SceneRecord is a specific instance of the QueueRecord type defined in Records.jl. It represents a collection of Scenes.
+# constructor
+    SceneRecord(capacity::Int, timestep::Float64, frame_capacity::Int=100)
+"""
+const SceneRecord = QueueRecord{VehicleDef}
+SceneRecord(capacity::Int, timestep::Float64, frame_capacity::Int=100) = QueueRecord(VehicleDef, capacity, timestep, frame_capacity)
+Base.show(io::IO, rec::SceneRecord) = print(io, "SceneRecord(nscenes=", nframes(rec), ")")
+
 function Base.get(::Type{LatLonAccelDirection}, rec::SceneRecord, roadway::Roadway, vehicle_index::Int, pastframe::Int=0)
     accel_lat = get(ACCFT, rec, roadway, vehicle_index, pastframe)
     accel_lon = get(ACCFS, rec, roadway, vehicle_index, pastframe)
@@ -95,7 +105,7 @@ function Base.copyto!(v::Vector{Float64}, a::AccelSteeringDirection)
     v
 end
 #function propagate(veh::Entity{VehicleState, BicycleModel, Int}, action::AccelSteeringAngle, roadway::Roadway, Δt::Float64)
-function AutomotiveDrivingModels.propagate(veh::Entity{VehicleState, D, Int}, action::AccelSteeringDirection, roadway::Roadway, Δt::Float64) where {D<:Union{VehicleDef, BicycleModel}}
+function AutomotiveSimulator.propagate(veh::Entity{VehicleState, D, Int}, action::AccelSteeringDirection, roadway::Roadway, Δt::Float64) where {D<:Union{VehicleDef, BicycleModel}}
     previousInd = veh.state.posF.roadind
     
     L = veh.def.a + veh.def.b
@@ -169,7 +179,7 @@ function NextState()
     return NextState(0.0,0.0,0.0,0.0,1)
 end
 
-function AutomotiveDrivingModels.propagate(veh::Entity{VehicleState, D, Int}, action::NextState,  roadway::Roadway, Δt::Float64) where {D<:Union{VehicleDef, BicycleModel}}
+function AutomotiveSimulator.propagate(veh::Entity{VehicleState, D, Int}, action::NextState,  roadway::Roadway, Δt::Float64) where {D<:Union{VehicleDef, BicycleModel}}
     previousInd = veh.state.posF.roadind
 
     posG = VecSE2(action.x, action.y, action.theta)

@@ -1,5 +1,5 @@
-import AutoViz.render
-import AutoViz.render!
+import AutomotiveVisualization.render
+import AutomotiveVisualization.render!
 
 function render_multipoint_drivers!(
     rendermodel::RenderModel,
@@ -57,11 +57,10 @@ function render(ctx::Cairo.CairoContext, scene::Union{Scene,Frame{Entity{Vehicle
     for (i,veh) in enumerate(scene)
         if haskey(models,veh.id)
             model = models[veh.id]
-            name = AutomotiveDrivingModels.get_name(model)
-            if  name == "MultiPtsTurningDriver"
+            if model <: MultiPtsTurningDriver
                 render_multipoint_drivers!(rendermodel,model,veh.id,car_colors)
             end
-            if name == "UrbanDriver"
+            if model <: UrbanDriver
                 render_urban_drivers!(rendermodel,model,veh.id,car_colors)
             end
         end

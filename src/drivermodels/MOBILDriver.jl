@@ -1,4 +1,4 @@
-import AutomotiveDrivingModels.observe!
+import AutomotiveSimulator.observe!
 
 mutable struct MOBILDriver <: LaneChangeModel{LaneChangeChoice}
 
@@ -31,15 +31,15 @@ mutable struct MOBILDriver <: LaneChangeModel{LaneChangeChoice}
         retval
     end
 end
-get_name(::MOBILDriver) = "MOBILDriver"
+
 function set_desired_speed!(model::MOBILDriver, v_des::Float64)
     set_desired_speed!(model.mlon, v_des)
     model
 end
-function AutomotiveDrivingModels.observe!(model::MOBILDriver, scene::Scene, roadway::Roadway, egoid::Int)
+function AutomotiveSimulator.observe!(model::MOBILDriver, scene::Scene, roadway::Roadway, egoid::Int)
     observe_helper!(model,scene,roadway,egoid)
 end
-function AutomotiveDrivingModels.observe!(model::MOBILDriver, scene::Frame{Entity{VehicleState, BicycleModel, Int}}, roadway::Roadway, egoid::Int)
+function AutomotiveSimulator.observe!(model::MOBILDriver, scene::Frame{Entity{VehicleState, BicycleModel, Int}}, roadway::Roadway, egoid::Int)
     observe_helper!(model,scene,roadway,egoid)
 end
 

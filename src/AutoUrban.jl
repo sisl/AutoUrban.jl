@@ -2,10 +2,11 @@ __precompile__()
 
 module AutoUrban
 
-using AutomotiveDrivingModels
-using AutoViz
+using AutomotiveSimulator
+using AutomotiveVisualization
 using EzXML
 using Printf
+import Records: QueueRecord, Frame
 using LinearAlgebra
 using Distributions
 import Cairo
